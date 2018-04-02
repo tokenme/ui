@@ -4,7 +4,7 @@
       <v-flex xs12 sm8 md4>
         <v-card flat>
           <v-card-title class="d-block text-xs-center">
-            <img src="https://dq7xb1ewqq8wi.cloudfront.net/img/logo/200x200.png" width="120"/>
+            <img src="https://static.tianxi100.com/img/logo/200x200.png" width="120"/>
           </v-card-title>
           <v-card-text>
             <v-form v-model="loginForm.valid" ref="form" lazy-validation>

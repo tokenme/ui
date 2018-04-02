@@ -33,7 +33,7 @@
       </v-list-tile>
     </v-list>
     <div class="mt-5 text-xs-center">
-      <img src="https://dq7xb1ewqq8wi.cloudfront.net/img/logo/200x200.png" width="60"/>
+      <img src="https://static.tianxi100.com/img/logo/200x200.png" width="60"/>
     </div>
   </v-navigation-drawer>
 </template>

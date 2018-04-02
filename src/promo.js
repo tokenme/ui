@@ -61,6 +61,10 @@ if (window.performance && window.gtag) {
   })
 }
 
+if (window.Raven) {
+  window.Raven.config('https://8e1767d8d7b94183805e4d1515665468@sentry.io/994578').install()
+}
+
 router.beforeEach((to, from, next) => {
   next()
 })
