@@ -12,6 +12,7 @@ export default {
       create_red_packet: 'Create Red Packet',
       transfer: 'Transfer Out',
       transfer_in: 'Transfer In',
+      transfer_from_wallet: 'Deposit from Wallet',
       create_red_packet_title: 'Create {token} Red Packet',
       total_tokens_label: 'Total Tokens',
       message_label: 'DISPLAY MESSAGE',
@@ -20,11 +21,14 @@ export default {
       cash_balance_title: 'Cash Value',
       token_details: 'Token Details',
       price_hint: '≈ {value} {currency}',
+      deposit_wait_tx_done: 'Please wait transaction complete!',
+      transfering: 'Transfering',
       help: {
         redpacket: 'Choose and click one token in the list to create Red Packet',
         wallet_address: 'If you dosen\'t have enough token in your wallet, you could transfer the token to this wallet address, then you could send Red Packet through [Create Red Packet]->[FROM WALLET]->[choose a token]. (Click to copy the address)'
       },
       error: {
+        deposit_failed: 'Deposit Failed',
         export_private_key_failed: 'Export Private Key Failed',
         create_red_packet_failed: 'Create Red Packet Failed',
         password_required: 'Password is required',
@@ -47,6 +51,7 @@ export default {
       create_red_packet: '發紅包',
       transfer: '轉出',
       transfer_in: '轉入',
+      transfer_from_wallet: '從主錢包充值',
       create_red_packet_title: '創建 {token} 紅包',
       total_tokens_label: '代幣總數',
       message_label: '恭喜發財，大吉大利',
@@ -55,6 +60,8 @@ export default {
       cash_balance_title: '零錢價值',
       token_details: '代幣詳情',
       price_hint: '≈ {value} {currency}',
+      deposit_wait_tx_done: '交易已提交，請等待轉賬完成！',
+      transfering: '轉賬中',
       form: {
         password: '密碼'
       },
@@ -63,6 +70,7 @@ export default {
         wallet_address: '如果您的錢包內還沒有代幣，您可以將相應的代幣和所需礦工費轉入該地址，之後就可以選擇【發紅包】->【用錢包】->選擇相應代幣發紅包了。(點擊複製錢包地址)'
       },
       error: {
+        deposit_failed: '充值失敗',
         export_private_key_failed: '導出密鑰失敗',
         create_red_packet_failed: '創建紅包失敗',
         password_required: '請填寫密碼',
@@ -85,6 +93,7 @@ export default {
       create_red_packet: '发红包',
       transfer: '转出',
       transfer_in: '转入',
+      transfer_from_wallet: '从主钱包充值',
       create_red_packet_title: '创建 {token} 红包',
       total_tokens_label: '代币总数',
       message_label: '恭喜发财，大吉大利',
@@ -93,6 +102,8 @@ export default {
       cash_balance_title: '零钱价值',
       token_details: '代币详情',
       price_hint: '≈ {value} {currency}',
+      deposit_wait_tx_done: '交易已提交，请等待转账完成！',
+      transfering: '转账中',
       form: {
         password: '密码'
       },
@@ -101,6 +112,7 @@ export default {
         wallet_address: '如果您的钱包内没有代币，可以将代币转入该地址，之后就可以选择【发红包】->【用钱包】->选择相应代币发红包了。(点击复制钱包地址)'
       },
       error: {
+        deposit_failed: '充值失败',
         export_private_key_failed: '导出密钥失败',
         create_red_packet_failed: '创建红包失败',
         password_required: '请填写密码',

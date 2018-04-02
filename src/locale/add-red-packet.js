@@ -11,6 +11,7 @@ export default {
       card_text: 'If you choose "FROM WALLET", you need to make sure you have enough ETH in your wallet, because you have to pay GAS fee for the miners. If you choose "FROM CASH", you don\'t have to pay any GAS fee.',
       price_hint: '≈ {value} {currency}',
       token_left_suffex: '{value}{symbol} left',
+      copy_wallet_address: 'Click to copy the wallet address',
       error: {
         create_red_packet_failed: 'Create Red Packet Failed',
         get_funds_failed: 'Get Tokens Failed',
@@ -36,6 +37,7 @@ export default {
       card_text: '如果選擇【用錢包】，您需要確保錢包內有足夠的ETH用來支付轉帳所需的礦工費。如果選擇【用零錢】，您無須支付任何ETH給礦工。',
       price_hint: '≈ {value} {currency}',
       token_left_suffex: '剩餘{value}{symbol}',
+      copy_wallet_address: '點擊複製錢包地址',
       error: {
         create_red_packet_failed: '創建紅包失敗',
         get_funds_failed: '獲取代幣失敗',
@@ -61,6 +63,7 @@ export default {
       card_text: '如果选择【用钱包】，您需要确保钱包内有足够的ETH用来支付转账所需矿工费。如果选择【用零钱】，您无须支付任何ETH给矿工。',
       price_hint: '≈ {value} {currency}',
       token_left_suffex: '剩余{value}{symbol}',
+      copy_wallet_address: '点击复制钱包地址',
       error: {
         create_red_packet_failed: '创建红包失败',
         get_funds_failed: '获取代币失败',

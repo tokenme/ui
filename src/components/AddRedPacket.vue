@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height class="px-0 pt-0 d-block" style="background-color:#bd503a">
+  <v-container fluid fill-height class="px-0 pt-0 d-block text-xs-center" style="background-color:#bd503a">
     <v-toolbar>
       <v-toolbar-items>
         <v-btn flat :class="cashClass" @click="toggleType('cash')">
@@ -76,6 +76,11 @@
         <v-btn large round color="error" :disabled="!newRedpacketForm.valid || creatingRedPacket" :loading="creatingRedPacket" @click="submitNewRedPacketForm">{{ $t('create_redpacket') }}</v-btn>
       </v-container>
     </div>
+    <v-btn small color="secondary" 
+      v-clipboard:copy="userWallet.wallet"
+      v-clipboard:success="onCopySuccess" v-if="activeType === 'wallet'">
+      {{ $t('copy_wallet_address') }}
+    </v-btn>
   </v-container>
 </template>
 
@@ -199,6 +204,9 @@
       }
     },
     methods: {
+      onCopySuccess(e) {
+        this.showSnackbar(this.$i18n.t('copied', { txt: e.text }))
+      },
       toggleType(t) {
         this.activeType = t
       },
@@ -274,7 +282,6 @@
             if (window.gtag) {
               window.gtag('event', 'red_packet', {'event_category': this.activeType, 'event_action': 'create', 'event_label': payload.token_address, 'value': payload.total_tokens})
             }
-            this.gotoRedPacket(response)
           }
         })
       },

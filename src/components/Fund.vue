@@ -20,7 +20,11 @@
           <v-list-tile-avatar>
             <v-icon>mdi-arrow-left</v-icon>
           </v-list-tile-avatar>
-          <v-list-tile-title>{{ $t('transfer_in') }}</v-list-tile-title>
+          <v-list-tile-title v-if="cashOnly && actionFund && actionFund.deposit_tx" style="height:30px;font-size:10px">
+            <small>{{ $t('transfering') }}:{{ actionFund.deposit_tx }}</small>
+            <v-progress-linear :indeterminate="true" height="5" class="mt-0 mb-0"></v-progress-linear>
+          </v-list-tile-title>
+          <v-list-tile-title v-else>{{ cashOnly ? $t('transfer_from_wallet') : $t('transfer_in') }}</v-list-tile-title>
         </v-list-tile>
         <v-divider></v-divider>
         <v-list-tile @click="onTransfer">
@@ -71,6 +75,30 @@
           <v-btn color="secondary" @click="redPacketDialog=false">{{ $t('close') }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="primary" :disabled="!newRedpacketForm.valid || creatingRedPacket" :loading="creatingRedPacket" @click="submitNewRedPacketForm">{{ $t('submit') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="depositDialog">
+      <v-card v-if="actionFund">
+        <v-card-title>
+          {{ $t('transfer_from_wallet') }} ({{ actionFund.token.name }})
+        </v-card-title>
+        <v-card-text>
+          <v-form v-model="depositForm.valid" ref="depositForm" lazy-validation>
+            <v-text-field 
+              v-model="depositForm.total_tokens" 
+              :label="$t('total_tokens_label')" 
+              :prepend-icon="actionFund.token.name==='ETH'?'mdi-currency-eth':'mdi-coins'"
+              :suffix="actionFund.token.name==='ETH'?'Ether':''" 
+              :rules="depositRules" 
+              :hint="tokenPriceHint"
+              required></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="secondary" @click="depositDialog=false">{{ $t('close') }}</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" :disabled="!depositForm.valid || depositing" :loading="depositing" @click="submitDepositForm">{{ $t('submit') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -182,7 +210,9 @@
       return {
         exporting: false,
         creatingRedPacket: false,
+        depositing: false,
         walletDialog: false,
+        depositDialog: false,
         passwordDialog: false,
         privateKeyDialog: false,
         redPacketDialog: false,
@@ -192,6 +222,10 @@
           message: '',
           total_tokens: 0,
           recipients: 0
+        },
+        depositForm: {
+          valid: true,
+          total_tokens: 0
         },
         passwordForm: {
           valid: true,
@@ -248,6 +282,19 @@
               }
               const minGasEther = this.userWallet.rp_min_gas
               return this.$i18n.t('error.rp_need_gas_and_token', {gas: minGasEther, tokens: parseFloat(v), symbol: fund.token.symbol})
+            }
+            return true
+          }
+        ]
+      },
+      depositRules() {
+        return [
+          v => parseFloat(v) > 0 || this.$i18n.t('error.number_required'),
+          v => {
+            const fund = this.actionFund
+            const inputTokens = parseFloat(v)
+            if ((fund.token.decimals >= 4 && inputTokens < Math.pow(10, -3)) || (fund.token.decimals < 4 && inputTokens < 10)) {
+              return this.$i18n.t('error.too_small_number')
             }
             return true
           }
@@ -313,9 +360,27 @@
         })
       },
       onTransferIn() {
-        this.walletDialog = true
+        this.actionSheet = false
+        if (!this.cashOnly) {
+          this.walletDialog = true
+          return
+        }
+        if (!this.actionFund) {
+          return
+        }
+        if (this.actionFund.deposit_tx) {
+          this.$copyText(this.actionFund.deposit_tx).then(res => {
+            this.onCopySuccess(res)
+          }, err => {
+            console.log(err)
+          })
+          return
+        }
+        this.depositForm.total_tokens = 0
+        this.depositDialog = true
       },
       onTransfer() {
+        this.actionSheet = false
         this.showErrorDialog({ title: this.$i18n.t('help.developing_title'), message: this.$i18n.t('help.developing_message') })
       },
       getFunds(cb) {
@@ -394,6 +459,35 @@
               window.gtag('event', 'red_packet', {'event_category': this.cashOnly ? 'cash' : (this.walletOnly ? 'wallet' : 'any'), 'event_action': 'create', 'event_label': payload.token_address, 'value': payload.total_tokens})
             }
             this.gotoRedPacket(response)
+          }
+        })
+      },
+      submitDepositForm() {
+        if (!this.$refs.depositForm.validate()) {
+          return false
+        }
+        const fund = this.actionFund
+        const totalTokens = parseFloat(this.depositForm.total_tokens)
+        let payload = {
+          token_address: fund.token.address,
+          total_tokens: totalTokens
+        }
+        this.depositing = true
+        redPacketAPI.deposit(this.token, payload).then((response) => {
+          this.depositing = false
+          if (response.code) {
+            let msg = response.message
+            if (response.code === 502) {
+              msg = this.$i18n.t('error.no_enough_gas', { amount: response.message })
+            } else if (response.code === 503) {
+              msg = this.$i18n.t('error.no_enough_token', { amount: response.message, token: fund.token.symbol })
+            }
+            this.showErrorDialog({ title: this.$i18n.t('error.deposit_failed'), message: msg })
+          } else {
+            if (window.gtag) {
+              window.gtag('event', 'red_packet', {'event_category': 'deposit', 'event_action': 'deposit', 'event_label': payload.token_address, 'value': payload.total_tokens})
+            }
+            this.showErrorDialog({ title: this.$i18n.t('success'), message: this.$i18n.t('deposit_wait_tx_done') })
           }
         })
       },
