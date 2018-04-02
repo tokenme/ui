@@ -7,6 +7,7 @@ export default {
       telegram: 'Telegram Account',
       check_fund: 'Check my fund',
       redpackets: 'Red Packets History',
+      faq: 'FAQ',
       error: {
         update_failed: 'Update failed'
       }
@@ -18,6 +19,7 @@ export default {
       telegram: 'Telegram 帳號',
       check_fund: '查看我的資產',
       redpackets: '紅包記錄',
+      faq: 'FAQ',
       error: {
         update_failed: '更新失敗'
       }
@@ -29,6 +31,7 @@ export default {
       telegram: 'Telegram 账号',
       check_fund: '查看我的资产',
       redpackets: '红包记录',
+      faq: 'FAQ',
       error: {
         update_failed: '更新失败'
       }

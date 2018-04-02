@@ -46,7 +46,8 @@ export default {
         fund: 'Fund',
         cash: 'Cash',
         wallet: 'Wallet',
-        token: 'Token Details'
+        token: 'Token Details',
+        faq: 'FAQ'
       },
       toolbarItem: {
         addChannel: 'Add Channel',
@@ -101,7 +102,8 @@ export default {
         fund: '資產',
         wallet: '錢包',
         cash: '零錢',
-        token: '代幣詳情'
+        token: '代幣詳情',
+        faq: 'FAQ'
       },
       tabs: {
         wallet: '錢包',
@@ -163,7 +165,8 @@ export default {
         fund: '资产',
         wallet: '钱包',
         cash: '零钱',
-        token: '代币详情'
+        token: '代币详情',
+        faq: 'FAQ'
       },
       tabs: {
         wallet: '钱包',

@@ -108,6 +108,17 @@
               <v-icon>mdi-chevron-right</v-icon>
             </v-list-tile-action>
           </v-list-tile>
+          <v-list-tile avatar :to="{name:'faq'}">
+            <v-list-tile-avatar>
+              <v-icon>mdi-help-circle</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t('faq') }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>mdi-chevron-right</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
         </v-list>
         <div v-html="telegramBtn"></div>
       </loadmore>

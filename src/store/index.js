@@ -8,6 +8,7 @@ import adzone from './modules/adzone'
 import airdrop from './modules/airdrop'
 import promotion from './modules/promotion'
 import redpacket from './modules/redpacket'
+import faq from './modules/faq'
 
 Vue.use(Vuex)
 
@@ -22,7 +23,8 @@ export default new Vuex.Store({
     adzone,
     airdrop,
     promotion,
-    redpacket
+    redpacket,
+    faq
   },
   strict: debug
 })

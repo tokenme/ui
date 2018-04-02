@@ -17,6 +17,7 @@ import RedPacket from './components/RedPacket.vue'
 import UserInfo from './components/UserInfo.vue'
 import Fund from './components/Fund.vue'
 import AddRedPacket from './components/AddRedPacket.vue'
+import Faq from './components/Faq.vue'
 import Token from './components/Token.vue'
 import store from './store'
 import i18nCommon from './locale/common'
@@ -157,6 +158,15 @@ const router = new VueRouter({
     component: Token,
     meta: {
       title: 'token',
+      showToolBar: true,
+      showTab: true
+    }
+  }, {
+    name: 'faq',
+    path: '/faq',
+    component: Faq,
+    meta: {
+      title: 'faq',
       showToolBar: true,
       showTab: true
     }
