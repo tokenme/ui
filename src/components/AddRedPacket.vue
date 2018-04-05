@@ -73,7 +73,7 @@
           <v-text-field v-model="newRedpacketForm.recipients" :label="$t('recipients_label')" prepend-icon="mdi-airballoon" :rules="recipientRules" required></v-text-field>
           <v-text-field v-model="newRedpacketForm.message" :label="$t('message_label')" :rules="messageRules"></v-text-field>
         </v-form>
-        <v-btn large round color="error" :disabled="!newRedpacketForm.valid || creatingRedPacket" :loading="creatingRedPacket" @click="submitNewRedPacketForm">{{ $t('create_redpacket') }}</v-btn>
+        <v-btn large round color="primary" :disabled="!newRedpacketForm.valid || creatingRedPacket" :loading="creatingRedPacket" @click="submitNewRedPacketForm">{{ $t('create_redpacket') }}</v-btn>
       </v-container>
     </div>
     <v-btn small color="secondary" 
@@ -169,13 +169,8 @@
               return this.$i18n.t('error.too_small_number')
             }
             const totalTokens = parseFloat(v) * Math.pow(10, fund.token.decimals)
-            if (totalTokens > fund.cash && (!this.userWallet.rp_enough_gas || totalTokens > fund.amount)) {
-              if (fund.token.name === 'ETH') {
-                const minGasEther = this.userWallet.rp_min_gas + Math.ceil(totalTokens / Math.pow(10, 9))
-                return this.$i18n.t('error.rp_need_eth', {gas: minGasEther})
-              }
-              const minGasEther = this.userWallet.rp_min_gas
-              return this.$i18n.t('error.rp_need_gas_and_token', {gas: minGasEther, tokens: parseFloat(v), symbol: fund.token.symbol})
+            if ((this.activeType === 'cash' && totalTokens > fund.cash) || (this.activeType !== 'cash' && totalTokens > fund.amount)) {
+              return this.$i18n.t('error.no_enough_token', { amount: totalTokens, token: fund.token.symbol })
             }
             return true
           }
@@ -260,12 +255,8 @@
           token_address: fund.token.address,
           recipients: parseInt(this.newRedpacketForm.recipients),
           total_tokens: totalTokens,
-          wallet_id: this.userWallet.id
-        }
-        if (this.activeType === 'cash') {
-          payload.cash_only = true
-        } else {
-          payload.wallet_only = true
+          wallet_id: this.userWallet.id,
+          from: this.activeType
         }
         this.creatingRedPacket = true
         redPacketAPI.add(this.token, payload).then((response) => {
@@ -282,6 +273,7 @@
             if (window.gtag) {
               window.gtag('event', 'red_packet', {'event_category': this.activeType, 'event_action': 'create', 'event_label': payload.token_address, 'value': payload.total_tokens})
             }
+            this.gotoRedPacket(response)
           }
         })
       },

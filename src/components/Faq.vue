@@ -1,6 +1,13 @@
 <template>
-  <v-container fluid>
-    <div v-html="faq"></div>
+  <v-container fluid class="px-0 pt-0 pb-0">
+    <v-expansion-panel focusable>
+      <v-expansion-panel-content v-for="(item, idx) in faq" :key="idx">
+        <div slot="header">{{ item.title }}</div>
+        <v-card>
+          <v-card-text class="grey lighten-3">{{ item.desc }}</v-card-text>
+        </v-card>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
   </v-container>
 </template>
 
@@ -14,13 +21,12 @@
         return this.$store.getters['locale']
       },
       faq() {
-        const faq = this.$store.getters.getByLocale(this.locale)
-        return window.marked(faq, { sanitize: true })
+        return this.$store.getters.getByLocale(this.locale)
       }
     },
     methods: {
       getFaq() {
-        this.$store.dispatch(types.FAQ_REQUEST, this.locale).then(res => {
+        this.$store.dispatch(types.FAQ_REQUEST).then(res => {
           this.toggleLoading(false)
         }, err => {
           this.toggleLoading(false)

@@ -4,6 +4,8 @@ export default {
       failed_title: 'GET FUNDS FAILED',
       main: 'MAIN ACCOUNT',
       export_private_key: 'export private key',
+      from_cash: 'USE CASH',
+      from_wallet: 'USE WALLET',
       form: {
         password: 'Password'
       },
@@ -46,6 +48,8 @@ export default {
       failed_title: '獲取資產失敗',
       main: '主錢包',
       export_private_key: '導出密鑰',
+      from_cash: '用零錢',
+      from_wallet: '用錢包',
       privatekey_response_title: '請確保密鑰安全！',
       privatekey_response_msg: '點擊複製',
       create_red_packet: '發紅包',
@@ -88,6 +92,8 @@ export default {
       failed_title: '获取资产失败',
       main: '主钱包',
       export_private_key: '导出密钥',
+      from_cash: '用零钱',
+      from_wallet: '用钱包',
       privatekey_response_title: '请确保密钥安全！',
       privatekey_response_msg: '点击复制',
       create_red_packet: '发红包',

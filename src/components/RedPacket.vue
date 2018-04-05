@@ -150,9 +150,9 @@
         </v-layout>
         <h3 class="headline mb-3 text-xs-center">{{ $t('headline', {num: redPacket.recipients}) }}</h3>
         <span>{{ redPacket.message }}</span>
-        <v-btn block color="success" v-if="redPacket.fund_tx_status!=1" @click.native="showShareSheet">{{ $t('share.title') }}</v-btn>
+        <v-btn block color="primary" v-if="redPacket.fund_tx_status!=1" @click.native="showShareSheet">{{ $t('share.title') }}</v-btn>
         <template v-else>
-          <v-btn block color="success" @click.native="shareLinkAlert">{{ $t('share.title') }}</v-btn>
+          <v-btn block color="primary" @click.native="shareLinkAlert">{{ $t('share.title') }}</v-btn>
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </template>
       </v-container>

@@ -24,11 +24,11 @@ import i18nCommon from './locale/common'
 import * as types from './store/mutation-types'
 
 Vue.use(VueI18n)
-Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueClipboard)
 Vue.use(SocialSharing)
 Vue.use(MetaInfo)
+Vue.use(Vuetify)
 
 const i18n = new VueI18n(i18nCommon)
 store.dispatch(types.GET_LOCALE_REQUEST).then((locale) => {
@@ -92,7 +92,7 @@ const router = new VueRouter({
     component: Fund,
     meta: {
       auth: true,
-      title: 'cash',
+      title: 'fund',
       showToolBar: true,
       showTab: true
     },
@@ -105,7 +105,7 @@ const router = new VueRouter({
     component: Fund,
     meta: {
       auth: true,
-      title: 'wallet',
+      title: 'fund',
       showToolBar: true,
       showTab: true
     },
@@ -128,7 +128,7 @@ const router = new VueRouter({
     component: Fund,
     meta: {
       auth: true,
-      title: 'fund',
+      title: 'wallet',
       showToolBar: true,
       showTab: true
     }

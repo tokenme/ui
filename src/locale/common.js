@@ -23,6 +23,7 @@ export default {
       tabs: {
         wallet: 'Wallet',
         cash: 'Cash',
+        fund: 'Fund',
         createRedPacket: 'Send Red Packet',
         redpackets: 'Red Packets',
         account: 'Account'
@@ -108,6 +109,7 @@ export default {
       tabs: {
         wallet: '錢包',
         cash: '零錢',
+        fund: '資產',
         createRedPacket: '發紅包',
         redpackets: '紅包記錄',
         account: '用戶中心'
@@ -171,6 +173,7 @@ export default {
       tabs: {
         wallet: '钱包',
         cash: '零钱',
+        fund: '资产',
         createRedPacket: '发红包',
         redpackets: '红包记录',
         account: '用户中心'

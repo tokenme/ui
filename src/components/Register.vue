@@ -172,7 +172,7 @@
         }
         const telegram = JSON.parse(localStorage.getItem('telegram'))
         if (telegram) {
-          payload.telegram = telegram
+          payload.telegram = JSON.stringify(telegram)
         }
         this.$store.dispatch(types.REGISTER_REQUEST, payload).then(res => {
           this.submitting = false

@@ -20,6 +20,7 @@
           <v-divider></v-divider>
           <v-list-tile avatar v-if="!editing.realname" @click="editing.realname = !editing.realname">
             <v-list-tile-avatar>
+              <v-icon>mdi-clipboard-account</v-icon>
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>{{ user.realname}}</v-list-tile-title>
@@ -108,6 +109,7 @@
               <v-icon>mdi-chevron-right</v-icon>
             </v-list-tile-action>
           </v-list-tile>
+          <v-divider></v-divider>
           <v-list-tile avatar :to="{name:'faq'}">
             <v-list-tile-avatar>
               <v-icon>mdi-help-circle</v-icon>
@@ -184,7 +186,6 @@
         })
       },
       telegramLoginCallback(user) {
-        console.log(user)
         const payload = {
           telegram: JSON.stringify(user)
         }

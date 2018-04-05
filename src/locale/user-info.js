@@ -5,7 +5,7 @@ export default {
       mobile: 'Mobile',
       realname: 'Name',
       telegram: 'Telegram Account',
-      check_fund: 'Check my fund',
+      check_fund: 'My Wallet',
       redpackets: 'Red Packets History',
       faq: 'FAQ',
       error: {
@@ -17,7 +17,7 @@ export default {
       mobile: '移動電話',
       realname: '暱稱',
       telegram: 'Telegram 帳號',
-      check_fund: '查看我的資產',
+      check_fund: '我的錢包',
       redpackets: '紅包記錄',
       faq: 'FAQ',
       error: {
@@ -29,7 +29,7 @@ export default {
       mobile: '手机号',
       realname: '昵称',
       telegram: 'Telegram 账号',
-      check_fund: '查看我的资产',
+      check_fund: '我的钱包',
       redpackets: '红包记录',
       faq: 'FAQ',
       error: {

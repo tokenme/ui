@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 export default {
-  get(lang) {
-    return axios.get('/faq/' + lang + '.md', {responseType: 'text'}).then((response) => {
+  get() {
+    return axios.get('/faq/faq.json').then((response) => {
       return response.data
     }).catch((err) => {
       if (err.response) {

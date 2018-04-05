@@ -32,7 +32,7 @@
     <v-footer app color="transparent" v-if="showFooter">
       <v-bottom-nav absolute :value="true" :active.sync="currentTab" color="white" v-if="showTab">
         <v-btn flat color="primary" value="cash">
-          <span>{{ $t('tabs.cash') }}</span>
+          <span>{{ $t('tabs.fund') }}</span>
           <v-icon>mdi-currency-usd</v-icon>
         </v-btn>
         <v-btn flat color="primary" value="addRedPacket">
@@ -142,6 +142,7 @@
       }
     },
     created() {
+      this.$vuetify.theme.primary = '#E91E63'
       bus.$on('changeLocale', (locale) => {
         this.changeLocale(locale)
       })

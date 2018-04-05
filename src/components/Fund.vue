@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height class="px-0 pt-0">
+  <v-container fluid fill-height class="px-0 pt-0 d-block">
     <v-bottom-sheet v-model="actionSheet">
       <v-list>
         <v-list-tile :to="{path:'/token/'+(actionFund.token.name==='ETH'?'ETH':actionFund.token.address)}" v-if="actionFund && actionFund.token.price">
@@ -8,7 +8,7 @@
           </v-list-tile-avatar>
           <v-list-tile-title>{{ $t('token_details') }}</v-list-tile-title>
         </v-list-tile>
-        <v-divider v-if="actionFund && actionFund.token.price"></v-divider>
+        <v-divider v-if="actionFund && actionFund.token.price && activeType"></v-divider>
         <v-list-tile @click="onCreateRedPacket">
           <v-list-tile-avatar>
             <v-icon>mdi-wallet-giftcard</v-icon>
@@ -20,11 +20,11 @@
           <v-list-tile-avatar>
             <v-icon>mdi-arrow-left</v-icon>
           </v-list-tile-avatar>
-          <v-list-tile-title v-if="cashOnly && actionFund && actionFund.deposit_tx" style="height:30px;font-size:10px">
+          <v-list-tile-title v-if="activeType==='cash' && actionFund && actionFund.deposit_tx" style="height:30px;font-size:10px">
             <small>{{ $t('transfering') }}:{{ actionFund.deposit_tx }}</small>
             <v-progress-linear :indeterminate="true" height="5" class="mt-0 mb-0"></v-progress-linear>
           </v-list-tile-title>
-          <v-list-tile-title v-else>{{ cashOnly ? $t('transfer_from_wallet') : $t('transfer_in') }}</v-list-tile-title>
+          <v-list-tile-title v-else>{{ activeType==='cash' ? $t('transfer_from_wallet') : $t('transfer_in') }}</v-list-tile-title>
         </v-list-tile>
         <v-divider></v-divider>
         <v-list-tile @click="onTransfer">
@@ -40,7 +40,7 @@
         <v-card-title>
           <v-btn small block
             v-clipboard:copy="userWallet.wallet"
-            v-clipboard:success="onCopySuccess" style="text-transform:none">{{ userWallet.wallet }}</v-btn>
+            v-clipboard:success="onCopySuccess" style="text-transform:none;font-size:10px">{{ userWallet.wallet }}</v-btn>
           <span class="grey--text">{{ $t('help.wallet_address') }}</span>
         </v-card-title>
         <v-card-text>
@@ -130,14 +130,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-toolbar v-if="activeType">
+      <v-toolbar-items>
+        <v-btn flat :class="cashClass" @click="toggleType('cash')">
+          <v-icon>mdi-currency-usd</v-icon>{{ $t('from_cash') }}
+        </v-btn>
+      </v-toolbar-items>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn flat :class="walletClass" @click="toggleType('wallet')">
+          <v-icon>mdi-wallet</v-icon>{{ $t('from_wallet') }}
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
     <loadmore 
       :top-method="topRefresh" 
       :topPullText="$t('loadmore.topPullText')"
       :topDropText="$t('loadmore.releaseText')"
       :topLoadingText="$t('loadmore.loadingText')"
       ref="loadmore">
-      <v-container v-if="!cashOnly">
-        <v-card v-if="userWallet" color="blue darken-2" class="white--text">
+      <v-container v-if="!activeType">
+        <v-card v-if="userWallet" color="primary" class="white--text">
           <v-card-title primary-title>
             <div class="headline">
               {{ userWallet.name }}
@@ -147,18 +160,18 @@
             </div>
           </v-card-title>
           <v-card-actions>
-            <span style="font-size:50%">≈</span> {{ fundMoney(walletOnly ? 'wallet' : '').toFixed(4) }}<sub style="font-size:50%">USD</sub>
+            <span style="font-size:50%">≈</span> {{ fundMoney('').toFixed(4) }}<sub style="font-size:50%">USD</sub>
             <v-spacer></v-spacer>
             <v-btn flat icon color="white" @click.native="walletDialog=true"><v-icon>mdi-qrcode</v-icon></v-btn>
             <v-btn color="warning" @click.native="passwordDialog=true" v-if="userWallet.is_private==1">{{ $t('export_private_key') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-container>
-      <v-container v-if="cashOnly">
-        <v-card v-if="userWallet" color="blue darken-2" class="white--text">
+      <v-container v-if="activeType">
+        <v-card v-if="userWallet" color="primary" class="white--text">
           <v-card-title primary-title class="d-block">
             <div class="headline text-xs-center">
-              <span style="font-size:50%">≈</span> {{ fundMoney(cashOnly?'cash':'wallet').toFixed(4) }}<sub style="font-size:50%">USD</sub>
+              <span style="font-size:50%">≈</span> {{ fundMoney(activeType).toFixed(4) }}<sub style="font-size:50%">USD</sub>
             </div>
           </v-card-title>
         </v-card>
@@ -172,15 +185,15 @@
               <img :src="fund.token.logo_address" v-if="fund.token.logo_address">
             </v-list-tile-avatar>
             <v-list-tile-content>
-              <v-list-tile-title>{{ fundValueTxt(fund, cashOnly ? 'cash' : '') }}</v-list-tile-title>
-              <v-list-tile-sub-title>{{ (cashOnly || walletOnly) ? fund.token.name : ($t('cash') + ': ' + fundValueTxt(fund, 'cash')) }}</v-list-tile-sub-title>
+              <v-list-tile-title>{{ fundValueTxt(fund, activeType) }}</v-list-tile-title>
+              <v-list-tile-sub-title>{{ activeType ? fund.token.name : ($t('cash') + ': ' + fundValueTxt(fund, 'cash')) }}</v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
               <v-list-tile-action-text class="text-xs-right">
-                {{ (cashOnly || walletOnly) ? '' : fund.token.name }}<v-chip label small class="mr-0">{{ fund.token.symbol }}</v-chip>
+                {{ activeType ? '' : fund.token.name }}<v-chip label small class="mr-0">{{ fund.token.symbol }}</v-chip>
                 <template v-if="fund.token.price">
                   <br/>
-                  ≈ {{ fundPriceTxt(fund, cashOnly?'cash':(walletOnly?'wallet':'')).toFixed(4) }}{{ fund.token.price.currency }}
+                  ≈ {{ fundPriceTxt(fund, activeType).toFixed(4) }}{{ fund.token.price.currency }}
                 </template>
               </v-list-tile-action-text>
             </v-list-tile-action>
@@ -232,7 +245,8 @@
           passwd: ''
         },
         actionSheet: false,
-        actionFund: null
+        actionFund: null,
+        activeType: ''
       }
     },
     props: {
@@ -240,6 +254,12 @@
       walletOnly: false
     },
     computed: {
+      cashClass() {
+        return this.activeType === 'cash' ? 'btn--active' : ''
+      },
+      walletClass() {
+        return this.activeType === 'wallet' ? 'btn--active' : ''
+      },
       userWallet() {
         return this.$store.getters['funds']
       },
@@ -275,13 +295,8 @@
               return this.$i18n.t('error.too_small_number')
             }
             const totalTokens = parseFloat(v) * Math.pow(10, fund.token.decimals)
-            if (totalTokens > fund.cash && (!this.userWallet.rp_enough_gas || totalTokens > fund.amount)) {
-              if (fund.token.name === 'ETH') {
-                const minGasEther = this.userWallet.rp_min_gas + Math.ceil(totalTokens / Math.pow(10, 9))
-                return this.$i18n.t('error.rp_need_eth', {gas: minGasEther})
-              }
-              const minGasEther = this.userWallet.rp_min_gas
-              return this.$i18n.t('error.rp_need_gas_and_token', {gas: minGasEther, tokens: parseFloat(v), symbol: fund.token.symbol})
+            if ((this.activeType === 'cash' && totalTokens > fund.cash) || (this.activeType !== 'cash' && totalTokens > fund.amount)) {
+              return this.$i18n.t('error.no_enough_token', { amount: v, token: fund.token.symbol })
             }
             return true
           }
@@ -315,6 +330,9 @@
       }
     },
     methods: {
+      toggleType(t) {
+        this.activeType = t
+      },
       onCopySuccess(e) {
         this.showSnackbar(this.$i18n.t('copied', { txt: e.text }))
       },
@@ -361,7 +379,7 @@
       },
       onTransferIn() {
         this.actionSheet = false
-        if (!this.cashOnly) {
+        if (this.activeType !== 'cash') {
           this.walletDialog = true
           return
         }
@@ -385,11 +403,6 @@
       },
       getFunds(cb) {
         let payload = {}
-        if (this.cashOnly) {
-          payload.cash_only = true
-        } else if (this.walletOnly) {
-          payload.wallet_only = true
-        }
         this.$store.dispatch(types.USER_FUND_REQUEST, payload).then(res => {
           this.toggleLoading(false)
           if (cb) {
@@ -436,12 +449,8 @@
           token_address: fund.token.address,
           recipients: parseInt(this.newRedpacketForm.recipients),
           total_tokens: totalTokens,
-          wallet_id: this.userWallet.id
-        }
-        if (this.cashOnly) {
-          payload.cash_only = true
-        } else if (this.walletOnly) {
-          payload.wallet_only = true
+          wallet_id: this.userWallet.id,
+          from: this.activeType
         }
         this.creatingRedPacket = true
         redPacketAPI.add(this.token, payload).then((response) => {
@@ -456,7 +465,7 @@
             this.showErrorDialog({ title: this.$i18n.t('error.create_red_packet_failed'), message: msg })
           } else {
             if (window.gtag) {
-              window.gtag('event', 'red_packet', {'event_category': this.cashOnly ? 'cash' : (this.walletOnly ? 'wallet' : 'any'), 'event_action': 'create', 'event_label': payload.token_address, 'value': payload.total_tokens})
+              window.gtag('event', 'red_packet', {'event_category': this.activeType || 'any', 'event_action': 'create', 'event_label': payload.token_address, 'value': payload.total_tokens})
             }
             this.gotoRedPacket(response)
           }
@@ -514,10 +523,11 @@
       }
     },
     mounted() {
+      this.activeType = this.cashOnly ? 'cash' : (this.walletOnly ? 'wallet' : '')
       this.toggleLoading(true)
       this.getFunds()
-      bus.$emit('changeTab', this.cashOnly ? 'cash' : (this.walletOnly ? 'wallet' : ''))
-      bus.$emit('showGoback', !this.cashOnly)
+      bus.$emit('changeTab', 'cash')
+      bus.$emit('showGoback', !this.activeType)
       bus.$emit('update_toolbar_icons', null)
       bus.$emit('update_toolbar_items', null)
     }
