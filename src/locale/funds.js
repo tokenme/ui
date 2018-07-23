@@ -9,12 +9,16 @@ export default {
       form: {
         password: 'Password'
       },
+      gas_price_label: 'GAS PRICE',
+      suggest_gas_price_hint: 'Currently suggest gas price is {price}Gwei',
+      wallet_label: 'Wallet Address',
       privatekey_response_title: 'Please keep it secret!',
       privatekey_response_msg: 'Click to copy',
       create_red_packet: 'Create Red Packet',
       transfer: 'Transfer Out',
       transfer_in: 'Transfer In',
       transfer_from_wallet: 'Deposit from Wallet',
+      checkout_to_wallet: 'Checkout to Wallet',
       create_red_packet_title: 'Create {token} Red Packet',
       total_tokens_label: 'Total Tokens',
       message_label: 'DISPLAY MESSAGE',
@@ -24,13 +28,16 @@ export default {
       token_details: 'Token Details',
       price_hint: '≈ {value} {currency}',
       deposit_wait_tx_done: 'Please wait transaction complete!',
+      checkout_wait_tx_done: 'Please wait transaction complete!',
       transfering: 'Transfering',
+      checkout_fee: 'Checkout fee: {fee}Ether',
       help: {
         redpacket: 'Choose and click one token in the list to create Red Packet',
         wallet_address: 'If you dosen\'t have enough token in your wallet, you could transfer the token to this wallet address, then you could send Red Packet through [Create Red Packet]->[FROM WALLET]->[choose a token]. (Click to copy the address)'
       },
       error: {
         deposit_failed: 'Deposit Failed',
+        checkout_failed: 'Checkout Failed',
         export_private_key_failed: 'Export Private Key Failed',
         create_red_packet_failed: 'Create Red Packet Failed',
         password_required: 'Password is required',
@@ -56,6 +63,7 @@ export default {
       transfer: '轉出',
       transfer_in: '轉入',
       transfer_from_wallet: '從主錢包充值',
+      checkout_to_wallet: '轉出到主錢包',
       create_red_packet_title: '創建 {token} 紅包',
       total_tokens_label: '代幣總數',
       message_label: '恭喜發財，大吉大利',
@@ -65,16 +73,22 @@ export default {
       token_details: '代幣詳情',
       price_hint: '≈ {value} {currency}',
       deposit_wait_tx_done: '交易已提交，請等待轉賬完成！',
+      checkout_wait_tx_done: '交易已提交，請等待轉賬完成！',
       transfering: '轉賬中',
       form: {
         password: '密碼'
       },
+      gas_price_label: 'GAS 出價',
+      suggest_gas_price_hint: '當前 Gas 建議出價為 {price}Gwei',
+      wallet_label: '錢包地址',
+      checkout_fee: '轉出費用: {fee}Ether',
       help: {
         redpacket: '選擇並點擊下面列表中的代幣創建紅包',
         wallet_address: '如果您的錢包內還沒有代幣，您可以將相應的代幣和所需礦工費轉入該地址，之後就可以選擇【發紅包】->【用錢包】->選擇相應代幣發紅包了。(點擊複製錢包地址)'
       },
       error: {
         deposit_failed: '充值失敗',
+        checkout_failed: '轉出失敗',
         export_private_key_failed: '導出密鑰失敗',
         create_red_packet_failed: '創建紅包失敗',
         password_required: '請填寫密碼',
@@ -100,6 +114,7 @@ export default {
       transfer: '转出',
       transfer_in: '转入',
       transfer_from_wallet: '从主钱包充值',
+      checkout_to_wallet: '转出到主钱包',
       create_red_packet_title: '创建 {token} 红包',
       total_tokens_label: '代币总数',
       message_label: '恭喜发财，大吉大利',
@@ -109,16 +124,22 @@ export default {
       token_details: '代币详情',
       price_hint: '≈ {value} {currency}',
       deposit_wait_tx_done: '交易已提交，请等待转账完成！',
+      checkout_wait_tx_done: '交易已提交，请等待转账完成！',
       transfering: '转账中',
       form: {
         password: '密码'
       },
+      gas_price_label: 'GAS 出价',
+      suggest_gas_price_hint: '当前 Gas 建议出价为 {price}Gwei',
+      wallet_label: '钱包地址',
+      checkout_fee: '转出费用: {fee}Ether',
       help: {
         redpacket: '选择并点击下面列表中的代币创建红包',
         wallet_address: '如果您的钱包内没有代币，可以将代币转入该地址，之后就可以选择【发红包】->【用钱包】->选择相应代币发红包了。(点击复制钱包地址)'
       },
       error: {
         deposit_failed: '充值失败',
+        checkout_failed: '转出失败',
         export_private_key_failed: '导出密钥失败',
         create_red_packet_failed: '创建红包失败',
         password_required: '请填写密码',

@@ -31,7 +31,11 @@
           <v-list-tile-avatar>
             <v-icon>mdi-transfer</v-icon>
           </v-list-tile-avatar>
-          <v-list-tile-title>{{ $t('transfer') }}</v-list-tile-title>
+          <v-list-tile-title v-if="actionFund && actionFund.checkout_tx" style="height:30px;font-size:10px">
+            <small>{{ $t('transfering') }}:{{ actionFund.checkout_tx }}</small>
+            <v-progress-linear :indeterminate="true" height="5" class="mt-0 mb-0"></v-progress-linear>
+          </v-list-tile-title>
+          <v-list-tile-title v-else>{{ $t('transfer') }}</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-bottom-sheet>
@@ -93,12 +97,58 @@
               :rules="depositRules" 
               :hint="tokenPriceHint"
               required></v-text-field>
+            <v-text-field 
+              v-model="depositForm.gas_price" 
+              :label="$t('gas_price_label')" 
+              :prepend-icon="mdi-currency-eth"
+              :suffix="Gwei" 
+              :rules="depositRules" 
+              :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})"
+              required></v-text-field>
           </v-form>
         </v-card-text>
         <v-card-actions>
           <v-btn color="secondary" @click="depositDialog=false">{{ $t('close') }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="primary" :disabled="!depositForm.valid || depositing" :loading="depositing" @click="submitDepositForm">{{ $t('submit') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="checkoutDialog">
+      <v-card v-if="actionFund">
+        <v-card-title>
+          {{ $t('checkout_to_wallet') }} ({{ actionFund.token.name }})
+        </v-card-title>
+        <v-card-text>
+          <v-form v-model="checkoutForm.valid" ref="checkoutForm" lazy-validation>
+            <v-text-field 
+              v-model="checkoutForm.total_tokens" 
+              :label="$t('total_tokens_label')" 
+              :prepend-icon="actionFund.token.name==='ETH'?'mdi-currency-eth':'mdi-coins'"
+              :suffix="actionFund.token.name==='ETH'?'Ether':''" 
+              :rules="checkoutRules" 
+              :hint="tokenPriceHint"
+              required></v-text-field>
+            <v-text-field v-if="activeType==='wallet'"
+              v-model="checkoutForm.gas_price" 
+              :label="$t('gas_price_label')" 
+              :prepend-icon="mdi-currency-eth"
+              :suffix="Gwei" 
+              :rules="checkoutRules" 
+              :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})"
+              required></v-text-field>
+            <v-text-field v-if="activeType==='wallet'"
+              v-model="checkoutForm.wallet" 
+              :label="$t('wallet_label')" 
+              :rules="checkoutRules" 
+              required></v-text-field>
+          </v-form>
+          <small>{{ $t('checkout_fee', {fee: userWallet.checkout_fee / Math.pow(10, 9)}) }}</small>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="secondary" @click="checkoutDialog=false">{{ $t('close') }}</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" :disabled="!checkoutForm.valid || checkingout" :loading="checkingout" @click="submitCheckoutForm">{{ $t('submit') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -209,6 +259,7 @@
   import VQrcode from 'v-qrcode'
   import * as types from '../store/mutation-types'
   import userAPI from '../api/user'
+  import gasAPI from '../api/gas'
   import redPacketAPI from '../api/red-packet'
   import i18n from '../locale/funds'
   import { bus } from '../bus'
@@ -222,8 +273,10 @@
     data() {
       return {
         exporting: false,
+        suggest_gas_price: 10,
         creatingRedPacket: false,
         depositing: false,
+        checkingout: false,
         walletDialog: false,
         depositDialog: false,
         passwordDialog: false,
@@ -238,7 +291,14 @@
         },
         depositForm: {
           valid: true,
-          total_tokens: 0
+          total_tokens: 0,
+          gas_price: 0
+        },
+        checkoutForm: {
+          valid: true,
+          total_tokens: 0,
+          gas_price: 0,
+          wallet: ''
         },
         passwordForm: {
           valid: true,
@@ -310,6 +370,23 @@
             const inputTokens = parseFloat(v)
             if ((fund.token.decimals >= 4 && inputTokens < Math.pow(10, -3)) || (fund.token.decimals < 4 && inputTokens < 10)) {
               return this.$i18n.t('error.too_small_number')
+            }
+            return true
+          }
+        ]
+      },
+      checkoutRules() {
+        return [
+          v => parseFloat(v) > 0 || this.$i18n.t('error.number_required'),
+          v => {
+            const fund = this.actionFund
+            const inputTokens = parseFloat(v)
+            if ((fund.token.decimals >= 4 && inputTokens < Math.pow(10, -3)) || (fund.token.decimals < 4 && inputTokens < 10)) {
+              return this.$i18n.t('error.too_small_number')
+            }
+            const totalTokens = parseFloat(v) * Math.pow(10, fund.token.decimals)
+            if ((this.activeType === 'cash' && totalTokens > fund.cash) || (this.activeType !== 'cash' && totalTokens > fund.amount)) {
+              return this.$i18n.t('error.no_enough_token', { amount: v, token: fund.token.symbol })
             }
             return true
           }
@@ -399,7 +476,25 @@
       },
       onTransfer() {
         this.actionSheet = false
-        this.showErrorDialog({ title: this.$i18n.t('help.developing_title'), message: this.$i18n.t('help.developing_message') })
+        if (this.activeType !== 'cash') {
+          this.walletDialog = true
+          return
+        }
+        if (!this.actionFund) {
+          return
+        }
+        if (this.actionFund.checkout_tx) {
+          this.$copyText(this.actionFund.checkout_tx).then(res => {
+            this.onCopySuccess(res)
+          }, err => {
+            console.log(err)
+          })
+          return
+        }
+        this.checkoutForm.total_tokens = 0
+        this.checkoutDialog = true
+        //this.actionSheet = false
+        //this.showErrorDialog({ title: this.$i18n.t('help.developing_title'), message: this.$i18n.t('help.developing_message') })
       },
       getFunds(cb) {
         let payload = {}
@@ -484,6 +579,7 @@
         this.depositing = true
         redPacketAPI.deposit(this.token, payload).then((response) => {
           this.depositing = false
+          this.depositDialog = false
           if (response.code) {
             let msg = response.message
             if (response.code === 502) {
@@ -497,6 +593,36 @@
               window.gtag('event', 'red_packet', {'event_category': 'deposit', 'event_action': 'deposit', 'event_label': payload.token_address, 'value': payload.total_tokens})
             }
             this.showErrorDialog({ title: this.$i18n.t('success'), message: this.$i18n.t('deposit_wait_tx_done') })
+          }
+        })
+      },
+      submitCheckoutForm() {
+        if (!this.$refs.checkoutForm.validate()) {
+          return false
+        }
+        const fund = this.actionFund
+        const totalTokens = parseFloat(this.checkoutForm.total_tokens)
+        let payload = {
+          token_address: fund.token.address,
+          total_tokens: totalTokens
+        }
+        this.checkingout = true
+        redPacketAPI.checkout(this.token, payload).then((response) => {
+          this.checkingout = false
+          this.checkoutDialog = false
+          if (response.code) {
+            let msg = response.message
+            if (response.code === 502) {
+              msg = this.$i18n.t('error.no_enough_gas', { amount: response.message })
+            } else if (response.code === 503) {
+              msg = this.$i18n.t('error.no_enough_token', { amount: response.message, token: fund.token.symbol })
+            }
+            this.showErrorDialog({ title: this.$i18n.t('error.checkout_failed'), message: msg })
+          } else {
+            if (window.gtag) {
+              window.gtag('event', 'red_packet', {'event_category': 'deposit', 'event_action': 'deposit', 'event_label': payload.token_address, 'value': payload.total_tokens})
+            }
+            this.showErrorDialog({ title: this.$i18n.t('success'), message: this.$i18n.t('checkout_wait_tx_done') })
           }
         })
       },
@@ -520,7 +646,23 @@
       },
       showSnackbar(msg) {
         this.$store.dispatch(types.SHOW_SNACKBAR, {message: msg})
+      },
+      getSuggestGasPrice() {
+        gasAPI.suggestPrice().then((response) => {
+          if (response.price) {
+            this.suggest_gas_price = Math.ceil(response.price / Math.pow(10, 9))
+            if (this.depositForm.gas_price === 0) {
+              this.depositForm.gas_price = this.suggest_gas_price
+            }
+            if (this.checkoutForm.gas_price === 0) {
+              this.checkoutForm.gas_price = this.suggest_gas_price
+            } 
+          }
+        })
       }
+    },
+    created() {
+      this.getSuggestGasPrice()
     },
     mounted() {
       this.activeType = this.cashOnly ? 'cash' : (this.walletOnly ? 'wallet' : '')

@@ -136,7 +136,6 @@ const actions = {
     state
   }) {
     return new Promise((resolve, reject) => {
-      localStorage.clear()
       commit(types.LOGOUT_SUCCESS)
       resolve()
     })
@@ -177,9 +176,21 @@ const cleanData = (state) => {
   state.jwt = null
   state.user = null
   const telegram = JSON.parse(localStorage.getItem('telegram'))
+  const mobile = localStorage.getItem('mobile')
+  const locale = localStorage.getItem('locale')
+  const countryCode = localStorage.getItem('countryCode')
   localStorage.clear()
   if (telegram) {
     localStorage.setItem('telegram', JSON.stringify(telegram))
+  }
+  if (mobile) {
+    localStorage.setItem('mobile', mobile)
+  }
+  if (countryCode) {
+    localStorage.setItem('countryCode', countryCode)
+  }
+  if (locale) {
+    localStorage.setItem('locale', locale)
   }
 }
 

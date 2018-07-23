@@ -1,5 +1,19 @@
 <template>
   <v-container class="fluid px-0 pt-0">
+    <v-dialog v-model="withdrawTXDialog">
+      <v-card>
+        <v-card-title class="headline">{{ $t('withdraw_tx_title') }}</v-card-title>
+        <v-card-text>
+          <v-btn block
+            v-clipboard:copy="withdrawTX"
+            v-clipboard:success="onCopySuccess">{{ $t('withdraw_tx_msg') }}</v-btn>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="withdrawTXDialog=false">{{ $t('close') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="newPromotionDialog">
       <v-card>
         <v-card-title class="headline">{{ $t('promotion_title') }}</v-card-title>
@@ -40,6 +54,23 @@
           <v-btn color="secondary" @click="newPromotionDialog=false">{{ $t('close') }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="primary" :disabled="creatingPromotion":loading="creatingPromotion" @click="onCreatePromotion">{{ $t('create') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="newWithdrawDialog">
+      <v-card>
+        <v-card-title class="headline">{{ $t('withdraw') }}</v-card-title>
+        <v-card-text>
+          <v-text-field prepend-icon="mdi-wallet" :label="$t('withdraw_form.wallet_label')"  required></v-text-field>
+          <v-text-field v-model="withdrawForm.token_amount" :label="$t('withdraw_form.token_amount_label')" prepend-icon="mdi-coins" :rules="integerRules" :suffix="airdrop.token.symbol" required></v-text-field>
+          <v-text-field v-model="withdrawForm.eth" :label="$t('withdraw_form.eth_amount_label')" prepend-icon="mdi-currency-eth"></v-text-field>
+          <v-text-field v-model="withdrawForm.gas_price" :label="$t('withdraw_form.gas_price_label')" prepend-icon="mdi-currency-eth" :rules="gasPriceRules" :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})" suffix="Gwei" required></v-text-field>
+          <v-text-field prepend-icon="mdi-key" v-model="withdrawForm.passwd" :label="$t('withdraw_form.password')" :rules="passwordRules" type="password"></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="secondary" @click="newWithdrawDialog=false">{{ $t('close') }}</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" :disabled="withdrawing":loading="withdrawing" @click="onWithdraw">{{ $t('withdraw') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -122,13 +153,13 @@
           </v-list-tile-avatar>
           <v-list-tile-content>
             <v-list-tile-title>@{{ airdrop.telegram_group }}</v-list-tile-title>
-            <v-list-tile-subtitle v-if="isOwner">
+            <v-list-tile-subtitle v-if="isAdmin || isOwner">
               <small class="yellow accent-4 px-2 pt-2 pb-2">{{ $t('add_telegram_bot_alert', { bot: airdrop.telegram_bot, group: airdrop.telegram_group }) }}</small>
             </v-list-tile-subtitle>
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar 
-          v-if="isAdmin || isOwner"
+          v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'"
           v-clipboard:copy="airdrop.wallet"
           v-clipboard:success="onCopySuccess">
           <v-list-tile-avatar>
@@ -139,7 +170,8 @@
             <v-list-tile-sub-title>{{ $t('wallet_address') }}</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile avatar v-if="isAdmin || isOwner">
+        <v-list-tile avatar 
+          v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'">
           <v-list-tile-avatar>
             <v-icon>mdi-currency-eth</v-icon>
           </v-list-tile-avatar>
@@ -151,7 +183,7 @@
             <v-chip label small>Gwei</v-chip>
           </v-list-tile-action>
         </v-list-tile>
-        <v-list-tile avatar>
+        <v-list-tile avatar v-if="airdrop.token.protocol == 'ERC20'">
           <v-list-tile-avatar>
             <v-icon>mdi-coins</v-icon>
           </v-list-tile-avatar>
@@ -160,14 +192,14 @@
             <v-list-tile-sub-title>{{ $t('token_balance') }}</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile v-if="isOwner">
+        <v-list-tile v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'">
           <v-list-tile-content>
             <v-list-tile-title style="height:40px">
-              <v-btn block color="warning">{{ $t('withdraw') }}</v-btn>
+              <v-btn block color="warning" @click="showWithdrawDialog">{{ $t('withdraw') }}</v-btn>
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <template v-if="isAdmin || isOwner">
+        <template v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'">
           <v-divider></v-divider>
           <v-subheader inset>{{ $t('transfer_setting') }}</v-subheader>
           <v-list-tile avatar v-if="!editing.gas_price" @click="editing.gas_price = !editing.gas_price ">
@@ -241,9 +273,11 @@
     data() {
       return {
         creatingPromotion: false,
+        withdrawing: false,
         airdropId: 0,
         newPromotionDialog: false,
         promotionResponseDialog: false,
+        newWithdrawDialog: false,
         promotionResponse: null,
         editing: {
           gas_price: false,
@@ -265,10 +299,18 @@
           channel_id: 0,
           adzone_id: 0
         },
+        withdrawForm: {
+          wallet: '',
+          token_amount: 0,
+          eth: 0,
+          gas_price: 0,
+          passwd: ''
+        },
         suggest_gas_price: 50,
         editingAdzone: false,
         newAdzoneName: '',
-        addingNewAdzone: false
+        addingNewAdzone: false,
+        withdrawTX: ''
       }
     },
     computed: {
@@ -295,6 +337,22 @@
       },
       adzones() {
         return this.$store.getters.getAdzonesByChannelId(this.newPromotionForm.channel_id)
+      },
+      passwordRules() {
+        return [
+          v => !!v || this.$i18n.t('error.password_required')
+        ]
+      },
+      integerRules() {
+        return [
+          v => parseInt(v) > 0 || this.$i18n.t('error.number_required')
+        ]
+      },
+      gasPriceRules() {
+        return [
+          v => parseInt(v) > 3 || this.$i18n.t('error.min_gas_price'),
+          v => parseInt(v) <= 500 || this.$i18n.t('error.max_gas_price')
+        ]
       }
     },
     methods: {
@@ -468,6 +526,36 @@
             this.showErrorDialog({ title: this.$i18n.t('error.update_airdrop_failed'), message: response.message })
           } else {
             this.getAirdrop()
+          }
+        })
+      },
+      showWithdrawDialog() {
+        this.withdrawForm = {
+          wallet: this.airdrop.wallet,
+          token_amount: this.airdrop.token_balance / Math.pow(10, this.airdrop.token.decimals),
+          eth: (this.airdrop.gas_balance_gwei / Math.pow(10, 9)).toFixed(2),
+          gas_price: this.suggest_gas_price || 0
+        }
+        this.newWithdrawDialog = true
+      },
+      onWithdraw() {
+        this.withdrawing = true
+        const payload = {
+          airdrop_id: this.airdrop.id,
+          wallet: this.withdrawForm.wallet,
+          token_amount: parseFloat(this.withdrawForm.token_amount),
+          eth: parseFloat(this.withdrawForm.eth),
+          gas_price: parseInt(this.withdrawForm.gas_price),
+          passwd: this.withdrawForm.passwd
+        }
+        airdropAPI.withdraw(this.token, payload).then((response) => {
+          this.withdrawing = false
+          this.newWithdrawDialog = false
+          if (response.code) {
+            this.showErrorDialog({ title: this.$i18n.t('error.withdraw_failed'), message: response.message })
+          } else {
+            this.withdrawTX = response.message
+            this.withdrawTXDialog = true
           }
         })
       },

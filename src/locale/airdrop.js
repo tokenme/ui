@@ -43,7 +43,8 @@ export default {
         min_gas_price: 'min gas price >= 3Gwei',
         max_gas_price: 'max gas price <= 500Gwei',
         min_gas_limit: 'min gas limit >= 150000',
-        number_required: 'must > 0'
+        number_required: 'must > 0',
+        withdraw_failed: 'Withdraw Failed'
       },
       start_date_label: 'START DATE',
       end_date_label: 'END DATE',
@@ -57,7 +58,16 @@ export default {
           bonus: 'Bonus(Gwei)',
           commission_fee: 'CommissionFee(Gwei)'
         }
-      }
+      },
+      withdraw_form: {
+        wallet_label: 'Wallet Address',
+        token_amount_label: 'Token Amount',
+        eth_amount_label: 'ETH Amount',
+        gas_price_label: 'Gas Price',
+        password: 'Password'
+      },
+      withdraw_tx_title: 'Withdraw Transaction',
+      withdraw_tx_msg: 'Click to copy withdraw transaction tx address'
     },
     zh_TW: {
       failed_title: '獲取空投任務失敗',
@@ -102,7 +112,8 @@ export default {
         min_gas_price: '最小 Gas 出價 3Gwei',
         max_gas_price: '最大 Gas 出價 500Gwei',
         min_gas_limit: '最小 Gas Limit >= 150000',
-        number_required: '必須大於0'
+        number_required: '必須大於0',
+        withdraw_failed: '提取餘額失敗'
       },
       start_date_label: '開始時間',
       end_date_label: '結束時間',
@@ -116,7 +127,16 @@ export default {
           bonus: '推廣獎勵(Gwei)',
           commission_fee: '平台佣金(Gwei)'
         }
-      }
+      },
+      withdraw_form: {
+        wallet_label: '錢包地址',
+        token_amount_label: '代幣數量',
+        eth_amount_label: 'ETH數量',
+        gas_price_label: 'Gas出價',
+        password: '密碼'
+      },
+      withdraw_tx_title: '退款交易地址',
+      withdraw_tx_msg: '點擊複製交易回執地址'
     },
     zh_CN: {
       failed_title: '获取空投任务失败',
@@ -155,7 +175,7 @@ export default {
       error: {
         get_adzones_failed: '获取资源位失败',
         update_airdrop_failed: '更新失败',
-        create_promotion_failed: '創建推廣計畫失敗',
+        create_promotion_failed: '创建推广计划失败',
         need_channel: '请选择渠道',
         need_adzone: '请选择资源位',
         min_gas_price: '最小 Gas 出价 3Gwei',
@@ -175,7 +195,17 @@ export default {
           bonus: '推广奖励(Gwei)',
           commission_fee: '平台佣金(Gwei)'
         }
-      }
+      },
+      withdraw_form: {
+        wallet_label: '钱包地址',
+        token_amount_label: '代币数量',
+        eth_amount_label: 'ETH数量',
+        gas_price_label: 'Gas出价',
+        password: '密码',
+        withdraw_failed: '提取余额失败'
+      },
+      withdraw_tx_title: '退款交易地址',
+      withdraw_tx_msg: '点击复制交易回执地址'
     }
   }
 }

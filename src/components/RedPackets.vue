@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height class="px-0 pt-0">
+  <v-container fluid fill-height class="px-0 pt-0"  style="overflow-y:scroll">
     <loadmore 
       :top-method="topRefresh" 
       :bottom-method="bottomRefresh" 

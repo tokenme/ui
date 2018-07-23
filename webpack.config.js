@@ -28,6 +28,7 @@ module.exports = (options = {}) => ({
   externals: {
     'axios': 'axios',
     'vue': 'Vue',
+    'vuex': 'Vuex',
     'vuetify': 'Vuetify',
     'vue-router': 'VueRouter',
     'vue-i18n': 'VueI18n',

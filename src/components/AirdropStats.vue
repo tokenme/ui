@@ -34,6 +34,7 @@
         </v-menu>
       </v-flex>
     </v-layout>
+    <v-btn block color="success" :disabled="!stats" :href="exportLink">{{ $t('airdrop_export') }}</v-btn>
     <v-select
       :items="chartSeriesSelections"
       v-model="chartSeries"
@@ -94,7 +95,8 @@
         },
         chartSeries: 'pv',
         stats: [],
-        summary: null
+        summary: null,
+        exporting: false
       }
     },
     props: {
@@ -139,6 +141,16 @@
           ]
         }
         return { labels: labels, datasets: dataSets }
+      },
+      exportLink() {
+        const payload = {
+          airdrop_id: this.airdropId,
+          start_date: this.options.start_date,
+          end_date: this.options.end_date,
+          jwt: this.token
+        }
+        const redirectLink = window.location.protocol + '//' + window.location.hostname + '/airdrop/submission-export?' + this.serialize(payload)
+        return redirectLink
       }
     },
     methods: {
@@ -174,6 +186,15 @@
             this.summary = response.summary
           }
         })
+      },
+      serialize(obj) {
+        var str = [];
+        for (var p in obj) {
+          if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+          }
+        }
+        return str.join('&')
       }
     },
     mounted() {

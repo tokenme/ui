@@ -1,29 +1,48 @@
 <template>
   <v-container fluid grid-list-lg>
+    <v-dialog v-model="promotionLinkDialog">
+      <v-card v-if="promotionLink">
+        <v-card-title class="headline" v-if="promotionLink">{{ $t('promote_btn') }}</v-card-title>
+        <v-card-text v-if="promotionLink">
+          <v-btn block
+            v-clipboard:copy="promotionLink"
+            v-clipboard:success="onCopySuccess">{{ $t('promo_link_msg') }}</v-btn>
+        </v-card-text>
+        <v-card-text v-else>
+          {{ $t('promo_link_alert') }}
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="promotionLinkDialog=false">{{ $t('close') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-card color="red darken-3" class="white--text mb-3" v-if="promo && promo.airdrop">
       <v-container fluid grid-list-lg>
         <v-layout row>
-          <v-flex xs5>
+          <v-flex>
             <div class="headline"><v-icon small color="white">mdi-airballoon</v-icon>{{ promo.airdrop.token.name }}</div>
           </v-flex>
-          <v-flex xs7>
+          <v-flex>
             <v-card color="red darken-2" class="white--text mx-2 mt-2 mb-2 pt-4 pb-4">
-              <h2 class="text-xs-center">{{ promo.airdrop.give_out }}<sup>{{ promo.airdrop.token.symbol }}</sup></h2>
+              <h2 class="text-xs-center" style="font-size:2em">{{ promo.airdrop.give_out }}<sup style="font-size:0.5em;top:-1.5em">{{ promo.airdrop.token.symbol }}</sup></h2>
             </v-card>
           </v-flex>
         </v-layout>
         <v-layout row>
-          <v-flex xs12>
-            <v-btn small flat class="white--text text--lighten-4 mb-1" style="text-transform:none" :href="'https://etherscan.io/token/' + promo.airdrop.token.address">
-              {{ promo.airdrop.token.address }}<v-icon color="white" small>mdi-arrow-right-bold-circle</v-icon>
+          <v-btn small flat class="white--text text--lighten-4 mb-1" style="text-transform:none;margin:0" :href="promo.airdrop.token.protocol=='ERC20'?('https://etherscan.io/token/' + promo.airdrop.token.address):promo.airdrop.token.website">
+              {{ promo.airdrop.token.protocol=='ERC20'?promo.airdrop.token.address:promo.airdrop.token.website }}<v-icon color="white" small>mdi-arrow-right-bold-circle</v-icon>
             </v-btn>
-          </v-flex>
         </v-layout>
       </v-container>
     </v-card>
-    <v-alert type="info" :value="true">
-      <v-btn small href="/">{{ $t('login') }}</v-btn> Tokenmama.io {{ $t('check_more_message') }}
-    </v-alert>
+    <v-divide></v-divide>
+    <v-card v-if="airdropDescription">
+      <v-container fluid>
+        <p v-html="airdropDescription" style="line-height:1.8em"></p>
+      </v-container>
+    </v-card>
+    <v-btn block color="success" @click.native="promotionLinkDialog=true" v-if="promo && promo.airdrop">{{ promo.airdrop.token.protocol==='ERC20' ? $t('promote_btn_with_amount', {amount: promo.airdrop.bonus + '%'}) : $t('promote_btn') }}</v-btn>
     <v-divide></v-divide>
     <h3 class="text-xs-center" v-if="finished">{{ $t('finished') }}</h3>
     <h3 class="text-xs-center" v-else-if="notStart">{{ $t('not_start') }}</h3>
@@ -31,13 +50,26 @@
     <h3 class="text-xs-center" v-else-if="notAvailable">{{ $t('not_available') }}</h3>
     <v-stepper vertical non-linear v-model="currentStep" v-else-if="promo && promo.verify_code">
       <v-stepper-step step="1" :complete="wallet != '' && submitted" editable>
-        {{ $t('input_wallet_title') }}
+        {{ $t('input_wallet_title', {symbol: walletName}) }}
         <small>{{ $t('input_wallet_subtitle') }}</small>
       </v-stepper-step>
       <v-stepper-content step="1">
-        <v-text-field prepend-icon="mdi-wallet" v-model="wallet" :label="$t('wallet_label')" :disabled="submitted" required></v-text-field>
+        <template v-if="promo.airdrop.token.client_ios || promo.airdrop.token.client_android">
+          <v-alert :value="true" outline color="warning" icon="priority_high">
+            {{ $t('download_subtitle', {symbol: promo.airdrop.token.protocol, wallet: walletName}) }}
+          </v-alert>
+          <v-btn v-if="promo.airdrop.token.client_ios" small :href="promo.airdrop.token.client_ios" style="text-transform:none">
+            <v-icon>mdi-apple</v-icon>
+            {{ $t('download_client', {client: 'iOS'}) }}
+          </v-btn>
+          <v-btn v-if="promo.airdrop.token.client_android" small :href="promo.airdrop.token.client_android" style="text-transform:none">
+            <v-icon>mdi-android</v-icon>
+            {{ $t('download_client', {client: 'Android'}) }}
+          </v-btn>
+        </template>
+        <v-text-field prepend-icon="mdi-wallet" v-model="wallet" :label="$t('wallet_label', {wallet: walletName})" :disabled="submitted" required></v-text-field>
         <code v-if="privateKey">{{ $t('private_key_txt', {key: privateKey}) }}</code>
-        <v-btn v-if="!submitted" small flat 
+        <v-btn v-if="!submitted && promo.airdrop.token.protocol=='ERC20'" small flat 
           color="primary" 
           :loading="gettingWallet" 
           @click.native="createNewWallet" 
@@ -75,11 +107,16 @@
         {{ $t('verify_in_telegram_group_title') }}
         <small>{{ $t('verify_in_telegram_group_subtitle') }}</small>
       </v-stepper-step>
-      <v-stepper-content step="4"></v-stepper-content>
       <v-stepper-step step="5">
         {{ $t('wait_for_transaction_title') }}
-        <small>{{ $t('wait_for_transaction_subtitle') }}</small>
+        <small>{{ promo.airdrop.token.protocol=='ERC20'?$t('wait_for_transaction_subtitle', {wallet: 'ETH'}): $t('wait_for_transaction_subtitle2', {wallet: walletName}) }}</small>
       </v-stepper-step>
+      <v-stepper-step step="6" editable>
+        {{ $t('check_more_title') }}
+      </v-stepper-step>
+      <v-stepper-content step="6">
+        <v-btn small href="/">{{ $t('login') }}</v-btn> Tokenmama.io {{ $t('check_more_message') }}
+      </v-stepper-content>
     </v-stepper>
   </v-container>
 </template>
@@ -101,11 +138,33 @@
         privateKey: '',
         copyedCode: false,
         gettingWallet: false,
+        promotionLink: '',
         submitting: false,
-        submitted: false
+        submitted: false,
+        promotionLinkDialog: false,
+        promotionLinkAlert: false
       }
     },
     computed: {
+      locale() {
+        return this.$store.getters['locale']
+      },
+      airdropDescription() {
+        if (this.promo && this.promo.airdrop && this.promo.airdrop.intro) {
+          const intro = JSON.parse(this.promo.airdrop.intro)
+          if (intro && intro[this.locale]) return intro[this.locale]
+        }
+        return ''
+      },
+      walletName() {
+        if (this.promo && this.promo.airdrop && this.promo.airdrop.token) {
+          switch (this.promo.airdrop.token.protocol) {
+            case 'GDW': return 'G Wallet'
+            default: return 'ETH'
+          }
+        }
+        return 'ETH'
+      },
       stopped() {
         return this.promo && this.promo.airdrop && this.promo.airdrop.status === 0
       },
@@ -152,13 +211,14 @@
         if (!this.wallet) {
           return
         }
-        if (this.wallet.length !== 42 || this.wallet.indexOf('0x') !== 0) {
+        if (this.promo.airdrop.token.protocol === 'ERC20' && (this.wallet.length !== 42 || this.wallet.indexOf('0x') !== 0)) {
           this.showSnackbar(this.$i18n.t('error.invalid_wallet'))
           return
         }
         const payload = {
           verify_code: this.promo.verify_code,
-          wallet: this.wallet
+          wallet: this.wallet,
+          proto: this.key
         }
         this.submitting = true
         promotionAPI.submit(payload).then((response) => {
@@ -167,8 +227,10 @@
             this.showSnackbar(response.message)
             return
           }
+          this.promotionLink = response.link
           this.submitted = true
           this.currentStep = 2
+          this.promotionLinkDialog = true
         })
       },
       toggleLoading(v) {

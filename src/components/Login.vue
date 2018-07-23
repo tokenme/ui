@@ -135,6 +135,7 @@
           username: this.countryCode + '.' + this.loginForm.mobile,
           password: this.loginForm.passwd
         }).then(res => {
+          localStorage.setItem('mobile', this.loginForm.mobile)
           this.submitting = false
           if (this.$router.query && this.$router.query.redirect) {
             this.$router.push(this.$router.query.redirect)
@@ -153,6 +154,10 @@
       }
     },
     mounted() {
+      const mobile = localStorage.getItem('mobile')
+      if (mobile) {
+        this.loginForm.mobile = mobile
+      }
       bus.$emit('update_toolbar_icons', null)
       bus.$emit('update_toolbar_items', null)
     }

@@ -110,10 +110,10 @@
         </v-flex>
       </v-layout>
       <line-chart
+        ref="chart"
         :chart-data="chartData"
         :options="chartOptions"
         :height="200"
-        v-if="graph"
         >
       </line-chart>
     </template>
@@ -175,12 +175,14 @@
     computed: {
       chartData() {
         if (!this.graph) {
-          return { labels: [], datasets: [] }
+          return { datasets: [] }
         }
+        let labels = []
         let marketcaps = []
         let pricesUsd = []
         let volumesUsd = []
         for (const i of this.graph.market_cap_by_available_supply) {
+          labels.push(new Date(i[0]))
           marketcaps.push({ t: new Date(i[0]), y: i[1] })
         }
         for (const i of this.graph.price_usd) {
@@ -254,6 +256,7 @@
           } else {
             this.graph = response
           }
+          //this.$refs.chart.renderChart(this.chartData, this.chartOptions)
         })
       },
       toggleLoading(v) {

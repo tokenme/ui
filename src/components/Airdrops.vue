@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height class="px-0 pt-0">
+  <v-container fluid fill-height class="px-0 pt-0" style="overflow-y:scroll">
     <v-dialog v-model="applyAirdropDialog">
       <v-card>
         <v-card-title class="headline">{{ $t('apply_airdrop_title') }}</v-card-title>
@@ -41,7 +41,7 @@
                 <v-chip label><v-icon small>mdi-trophy-award</v-icon>{{ airdrop.bonus }}%</v-chip>
                 <span class="grey--text">@{{ airdrop.telegram_group }}</span>
               </div>
-              <div class="grey--text mt-2">
+              <div class="grey--text mt-2" v-if="airdrop.token.protocol=='ERC20'">
                 {{ $t('gas_balance_label') }}: {{ airdrop.gas_balance_gwei }}<sup>GAS(Gwei)</sup>, {{ airdrop.token_balance / Math.pow(10, airdrop.token.decimals) }}<sup>{{ airdrop.token.symbol }}</sup>
               </div>
             </v-container>
@@ -104,6 +104,7 @@
         this.getAirdrops(() => { this.$refs.loadmore.onTopLoaded(id) })
       },
       bottomRefresh(id) {
+        console.log('bottomRefreshed')
         this.queryParams.page += 1
         this.getAirdrops(() => { this.$refs.loadmore.onBottomLoaded(id) })
         //this.allLoaded = true;

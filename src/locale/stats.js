@@ -3,6 +3,7 @@ export default {
     en: {
       start_date_label: 'START DATE',
       end_date_label: 'END DATE',
+      airdrop_export: 'Export Submissions',
       stats: {
         header: {
           record_on: 'Date',
@@ -18,6 +19,7 @@ export default {
     zh_TW: {
       start_date_label: '開始時間',
       end_date_label: '結束時間',
+      airdrop_export: '導出訂閱用戶',
       stats: {
         header: {
           record_on: '日期',
@@ -33,6 +35,7 @@ export default {
     zh_CN: {
       start_date_label: '开始时间',
       end_date_label: '结束时间',
+      airdrop_export: '导出订阅用户',
       stats: {
         header: {
           record_on: '日期',

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height class="px-0 pt-0">
+  <v-container fluid fill-height class="px-0 pt-0" style="overflow-y:scroll">
     <loadmore 
       :top-method="topRefresh" 
       :bottom-method="bottomRefresh" 
@@ -22,7 +22,7 @@
                 <v-chip label><v-icon small>mdi-trophy-award</v-icon>{{ promotion.airdrop.bonus }}%</v-chip>
                 <span class="grey--text">@{{ promotion.airdrop.telegram_group }}</span>
               </div>
-              <div class="grey--text mt-2">
+              <div class="grey--text mt-2" v-if="promotion.airdrop.token.protocol==='ERC20'">
                 {{ $t('gas_balance_label') }}: {{ promotion.airdrop.gas_balance_gwei }}<sup>GAS(Gwei)</sup>, {{ promotion.airdrop.token_balance / Math.pow(10, promotion.airdrop.token.decimals)}}<sup>{{ promotion.airdrop.token.symbol }}</sup>
               </div>
               <div class="mt-2">
