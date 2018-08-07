@@ -320,6 +320,7 @@
   import redPacketAPI from '../api/red-packet'
   import smsAPI from '../api/sms'
   import i18n from '../locale/rp'
+  import * as util from '../util'
 
   export default {
     i18n: i18n,
@@ -512,7 +513,13 @@
         })
       },
       checkHongbao() {
-        if (this.logined) {
+        if (util.isWeixinBrowser()) {
+          if (this.key) {
+            localStorage.setItem('share_key', this.key)
+          }
+          this.$router.replace('/guide?relogin=1')
+          return
+        } else if (this.logined) {
           this.logining = true
           this.submitRedPacket().then(res => {
             if (res.message === 'unlucky') {
@@ -532,7 +539,7 @@
             this.showErrorDialog({ title: this.$i18n.t('error.submit_failed'), message: err.message })
           })
           return
-        }
+        } 
         this.loginDialog = true
       },
       submitRedPacket() {
@@ -717,6 +724,9 @@
     mounted() {
       this.toggleLoading(true)
       this.getRedPacket().then(res => {
+        if (util.isWeixinBrowser() && res && res.link && res.link.indexOf('tokenmama.io') > -1) {
+          location.href = res.link.replace('tokenmama.io', 'tmm.tianxi100.com')
+        }
         this.toggleLoading(false)
         this.redPacket = res
         if (this.showAllTaken || this.expired) {

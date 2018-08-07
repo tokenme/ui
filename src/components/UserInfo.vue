@@ -135,6 +135,7 @@
   import userAPI from '../api/user'
   import i18n from '../locale/user-info'
   import { bus } from '../bus'
+  import * as util from '../util'
 
   export default {
     i18n: i18n,
@@ -210,6 +211,11 @@
           }
         }, err => {
           this.toggleLoading(false)
+          if ((err.code === 401 || err.code === 403) && util.isWeixinBrowser()) {
+            localStorage.clear()
+            this.$router.replace('/guide?relogin=1')
+            return
+          }
           if (err.code === 401) {
             this.$router.push({
               name: 'login'

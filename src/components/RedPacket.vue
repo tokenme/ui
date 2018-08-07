@@ -18,7 +18,28 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-bottom-sheet v-model="shareSheet">
+    <v-bottom-sheet v-if="isWeixinBrowser" v-model="shareSheet">
+      <v-list>
+        <v-subheader>{{ $t('share.title') }}</v-subheader>
+        <v-list-tile @click="copyLink">
+          <v-list-tile-avatar>
+            <v-avatar tile>
+              <v-icon>mdi-content-copy</v-icon>
+            </v-avatar>
+          </v-list-tile-avatar>
+          <v-list-tile-title>{{ $t('share.copy') }}</v-list-tile-title>
+        </v-list-tile>
+        <v-list-tile @click="shareWechat">
+          <v-list-tile-avatar>
+            <v-avatar tile>
+              <v-icon>mdi-wechat</v-icon>
+            </v-avatar>
+          </v-list-tile-avatar>
+          <v-list-tile-title>{{ $t('share.wechat') }}</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-bottom-sheet>
+    <v-bottom-sheet v-else v-model="shareSheet">
       <v-list>
         <v-subheader>{{ $t('share.title') }}</v-subheader>
         <v-list-tile @click="copyLink">
@@ -204,6 +225,8 @@
   import * as types from '../store/mutation-types'
   import i18n from '../locale/red-packet'
   import { bus } from '../bus'
+  import * as util from '../util'
+  import wx from 'weixin-js-sdk'
 
   export default {
     i18n: i18n,
@@ -215,7 +238,8 @@
         redPacketId: 0,
         shareSheet: false,
         shareWechatDialog: false,
-        shareMessage: ''
+        shareMessage: '',
+        isWeixinBrowser: false
       }
     },
     computed: {
@@ -294,6 +318,11 @@
           }
         }, err => {
           this.toggleLoading(false)
+          if ((err.code === 401 || err.code === 403) && util.isWeixinBrowser()) {
+            localStorage.clear()
+            this.$router.replace('/guide?relogin=1')
+            return
+          }
           if (err.code === 401) {
             this.$router.push({
               name: 'login'
@@ -324,7 +353,22 @@
       }
     },
     created() {
+      this.isWeixinBrowser = util.isWeixinBrowser()
       this.redPacketId = parseInt(this.$route.params.id)
+      if (this.isWeixinBrowser) {
+        let shareConfig = {
+          title: this.share.title,
+          desc: this.share.description,
+          link: this.share.link,
+          imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
+          type: '',
+          dataUrl: '',
+          success: function () {
+            console.log('shared')
+          }
+        }
+        wx.onMenuShareAppMessage(shareConfig)
+      }
     },
     mounted() {
       if (!this.redPacketId || this.redPacketId.id !== this.redPacketId) {
