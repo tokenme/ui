@@ -13,15 +13,16 @@
               {{ $t('token_symbol') }}: <strong>{{ newAirdropForm.token.symbol }}</strong>
             </v-chip>
             <v-chip label outline color="primary">
-              {{ $t('token_decimals') }}: <strong>{{ newAirdropForm.token.decimals }}</strong></strong>
+              {{ $t('token_decimals') }}: <strong>{{ newAirdropForm.token.decimals || 0 }}</strong></strong>
             </v-chip>
             <v-divider></v-divider>
           </div>
           <v-text-field v-model="newAirdropForm.gas_price" :label="$t('gas_price_label')" prepend-icon="mdi-currency-eth" :rules="gasPriceRules" :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})" suffix="Gwei" required></v-text-field>
-          <v-text-field v-model="newAirdropForm.gas_limit" :label="$t('gas_limit_label')" prepend-icon="mdi-arrow-collapse-up" :rules="gasLimitRules" required></v-text-field>
           <v-text-field v-model="newAirdropForm.give_out" :label="$t('give_out_label')" prepend-icon="mdi-airballoon" :rules="integerRules" :suffix="$t('symbol_per_user', {symbol: newAirdropForm.token.symbol})" required></v-text-field>
           <v-text-field v-model="newAirdropForm.bonus" :label="$t('bonus_label')" prepend-icon="mdi-trophy-award" :rules="bonusRules" :hint="$t('bonus_hint')" :suffix="$t('symbol_per_tx', {symbol: newAirdropForm.token.symbol})" required></v-text-field>
+          <v-text-field v-model="newAirdropForm.max_submissions" :label="$t('max_submissions_label')" prepend-icon="mdi-account-group" required></v-text-field>
           <v-text-field v-model="newAirdropForm.telegram_group" :label="$t('telegram_group_label')" prepend-icon="mdi-telegram" :rules="telegramRules" required></v-text-field>
+          <v-switch :label="$t('require_email_label')" v-model="newAirdropForm.require_email"></v-switch>
           <v-menu
             ref="start_date_menu"
             lazy
@@ -87,12 +88,13 @@
             decimals: 0
           },
           gas_price: 0,
-          gas_limit: 210000,
           give_out: 0,
           bonus: 0,
+          max_submissions: 0,
           telegram_group: '',
           start_date: '',
-          end_date: ''
+          end_date: '',
+          require_email: false
         },
         suggest_gas_price: 50,
         start_date_menu: false,
@@ -117,14 +119,8 @@
       },
       gasPriceRules() {
         return [
-          v => parseInt(v) > 3 || this.$i18n.t('error.min_gas_price'),
+          v => parseInt(v) >= 1 || this.$i18n.t('error.min_gas_price'),
           v => parseInt(v) <= 500 || this.$i18n.t('error.max_gas_price')
-        ]
-      },
-      gasLimitRules() {
-        return [
-          v => parseInt(v) > 0 || this.$i18n.t('error.number_required'),
-          v => parseInt(v) >= 150000 || this.$i18n.t('error.min_gas_limit')
         ]
       },
       integerRules() {
@@ -165,12 +161,13 @@
           title: this.newAirdropForm.title,
           token_address: this.newAirdropForm.token.address,
           gas_price: parseInt(this.newAirdropForm.gas_price),
-          gas_limit: parseInt(this.newAirdropForm.gas_limit),
           give_out: parseInt(this.newAirdropForm.give_out),
           bonus: parseInt(this.newAirdropForm.bonus),
+          max_submissions: parseInt(this.newAirdropForm.max_submissions),
           telegram_group: this.newAirdropForm.telegram_group,
           start_date: moment(this.newAirdropForm.start_date).valueOf(),
-          end_date: moment(this.newAirdropForm.end_date).valueOf()
+          end_date: moment(this.newAirdropForm.end_date).valueOf(),
+          require_email: this.newAirdropForm.require_email ? 1 : 0
         }
         this.submitting = true
         airdropAPI.add(this.token, payload).then((response) => {
@@ -178,7 +175,7 @@
           if (response.code) {
             this.showErrorDialog({ title: this.$i18n.t('failed_title'), message: response.message })
           } else {
-            this.gotoAirdrops(response)
+            this.gotoAirdrop(response)
           }
         })
       },

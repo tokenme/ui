@@ -84,6 +84,8 @@
     data() {
       return {
         loading: false,
+        start_date_menu: false,
+        end_date_menu: false,
         options: {
           start_date: '',
           end_date: ''
