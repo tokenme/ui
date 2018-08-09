@@ -24,7 +24,7 @@ import store from './store'
 import i18nCommon from './locale/common'
 import * as types from './store/mutation-types'
 import * as util from './util'
-import wx from 'weixin-js-sdk'
+import wx from 'jWeixin'
 
 Vue.use(VueI18n)
 Vue.use(VueRouter)
@@ -225,7 +225,6 @@ if (util.isWeixinBrowser()) {
           'onMenuShareAppMessage'
         ]
       }
-      console.log(wxConfig)
       wx.config(wxConfig)
       wx.ready(function(){
         wx.onMenuShareAppMessage({

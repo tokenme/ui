@@ -226,7 +226,7 @@
   import i18n from '../locale/red-packet'
   import { bus } from '../bus'
   import * as util from '../util'
-  import wx from 'weixin-js-sdk'
+  import wx from 'jWeixin'
 
   export default {
     i18n: i18n,
