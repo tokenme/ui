@@ -35,7 +35,8 @@ module.exports = (options = {}) => ({
     'vue-social-sharing': 'SocialSharing',
     'vue-chartjs': 'VueChartJs',
     'moment': 'moment',
-    'v-qrcode': 'VQrcode'
+    'v-qrcode': 'VQrcode',
+    'jWeixin': 'weixin-js-sdk'
   },
   output: {
     path: resolve(__dirname, OUTPUT_DIR),

@@ -237,7 +237,7 @@
           prepend-icon="mdi-message-reply" 
           :loading="updating.reply_msg" 
           :disabled="updating.reply_msg" 
-          :append-icon="updating.reply_msg ? 'mdi-loading' : (parseInt(editAirdropForm.reply_msg) != (airdrop.reply_msg || '') ? 'mdi-check':'mdi-close')" 
+          :append-icon="updating.reply_msg ? 'mdi-loading' : (editAirdropForm.reply_msg != (airdrop.reply_msg || '') ? 'mdi-check':'mdi-close')" 
           :append-icon-cb="() => (onUpdateAirdrop('reply_msg'))" 
           @change="onUpdateAirdrop('reply_msg')" 
           @blur="onUpdateAirdrop('reply_msg')"></v-text-field>
@@ -568,8 +568,12 @@
         if (this.updating[field]) {
           return
         }
-
-        const fieldValue = field === 'drop_date' ? moment(this.editAirdropForm[field]).valueOf() : parseInt(this.editAirdropForm[field])
+        let fieldValue = parseInt(this.editAirdropForm[field])
+        if (field === 'drop_date') {
+          fieldValue = moment(this.editAirdropForm[field]).valueOf()
+        } else if (field === 'reply_msg') {
+          fieldValue = this.editAirdropForm[field]
+        }
         let airdropValue = this.airdrop[field]
         if (fieldValue === airdropValue) {
           this.updating[field] = false
@@ -585,7 +589,9 @@
           reply_msg: this.editAirdropForm.reply_msg,
           status: parseInt(this.editAirdropForm.status)
         }
-        payload[field] = fieldValue
+        if (field !== 'max_submissions' && field !== 'reply_msg' && field !== 'status') {
+          payload[field] = fieldValue
+        }
 
         if (field === 'gas_price') {
           if (payload.gas_price < 3) {
