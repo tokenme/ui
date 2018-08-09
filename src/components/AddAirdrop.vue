@@ -23,6 +23,7 @@
           <v-text-field v-model="newAirdropForm.max_submissions" :label="$t('max_submissions_label')" prepend-icon="mdi-account-group" required></v-text-field>
           <v-text-field v-model="newAirdropForm.telegram_group" :label="$t('telegram_group_label')" prepend-icon="mdi-telegram" :rules="telegramRules" required></v-text-field>
           <v-switch :label="$t('require_email_label')" v-model="newAirdropForm.require_email"></v-switch>
+          <v-text-field v-model="newAirdropForm.reply_msg" :label="$t('reply_msg_label')" prepend-icon="mdi-message-reply" required></v-text-field>
           <v-menu
             ref="start_date_menu"
             lazy
@@ -94,7 +95,8 @@
           telegram_group: '',
           start_date: '',
           end_date: '',
-          require_email: false
+          require_email: false,
+          msg_reply: ''
         },
         suggest_gas_price: 50,
         start_date_menu: false,
@@ -165,6 +167,7 @@
           bonus: parseInt(this.newAirdropForm.bonus),
           max_submissions: parseInt(this.newAirdropForm.max_submissions),
           telegram_group: this.newAirdropForm.telegram_group,
+          msg_reply: this.newAirdropForm.msg_reply,
           start_date: moment(this.newAirdropForm.start_date).valueOf(),
           end_date: moment(this.newAirdropForm.end_date).valueOf(),
           require_email: this.newAirdropForm.require_email ? 1 : 0

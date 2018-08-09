@@ -204,24 +204,43 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar v-if="!editing.max_submissions && (isAdmin || isOwner)" @click="editing.max_submissions = !editing.max_submissions ">
-            <v-list-tile-avatar>
-              <v-icon>mdi-account-group</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>{{ airdrop.max_submissions || 0 }}</v-list-tile-title>
-              <v-list-tile-sub-title>{{ $t('max_submissions_label') }}</v-list-tile-sub-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-text-field v-else 
-            v-model="editAirdropForm.max_submissions" 
-            :label="$t('max_submissions_label')" 
-            prepend-icon="mdi-account-group" 
-            :loading="updating.max_submissions" 
-            :disabled="updating.max_submissions" 
-            :append-icon="updating.max_submissions ? 'mdi-loading' : (parseInt(editAirdropForm.max_submissions) != (airdrop.max_submissions || 0) ? 'mdi-check':'mdi-close')" 
-            :append-icon-cb="() => (onUpdateAirdrop('max_submissions'))" 
-            @change="onUpdateAirdrop('max_submissions')" 
-            @blur="onUpdateAirdrop('max_submissions')"></v-text-field>
+          <v-list-tile-avatar>
+            <v-icon>mdi-account-group</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ airdrop.max_submissions || 0 }}</v-list-tile-title>
+            <v-list-tile-sub-title>{{ $t('max_submissions_label') }}</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-text-field v-else 
+          v-model="editAirdropForm.max_submissions" 
+          :label="$t('max_submissions_label')" 
+          prepend-icon="mdi-account-group" 
+          :loading="updating.max_submissions" 
+          :disabled="updating.max_submissions" 
+          :append-icon="updating.max_submissions ? 'mdi-loading' : (parseInt(editAirdropForm.max_submissions) != (airdrop.max_submissions || 0) ? 'mdi-check':'mdi-close')" 
+          :append-icon-cb="() => (onUpdateAirdrop('max_submissions'))" 
+          @change="onUpdateAirdrop('max_submissions')" 
+          @blur="onUpdateAirdrop('max_submissions')"></v-text-field>
+        <v-list-tile avatar v-if="!editing.reply_msg && (isAdmin || isOwner)" @click="editing.reply_msg = !editing.reply_msg ">
+          <v-list-tile-avatar>
+            <v-icon>mdi-message-reply</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ airdrop.reply_msg || '' }}</v-list-tile-title>
+            <v-list-tile-sub-title>{{ $t('reply_msg_label') }}</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-text-field v-else 
+          v-model="editAirdropForm.reply_msg" 
+          :label="$t('reply_msg_label')" 
+          prepend-icon="mdi-message-reply" 
+          :loading="updating.reply_msg" 
+          :disabled="updating.reply_msg" 
+          :append-icon="updating.reply_msg ? 'mdi-loading' : (parseInt(editAirdropForm.reply_msg) != (airdrop.reply_msg || '') ? 'mdi-check':'mdi-close')" 
+          :append-icon-cb="() => (onUpdateAirdrop('reply_msg'))" 
+          @change="onUpdateAirdrop('reply_msg')" 
+          @blur="onUpdateAirdrop('reply_msg')"></v-text-field>
         <v-list-tile v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'">
           <v-list-tile-content>
             <v-list-tile-title style="height:40px">
@@ -280,18 +299,6 @@
             <v-text-field slot="activator" v-model="dropDateFormatted" :label="$t('drop_date_label')" prepend-icon="mdi-calendar-today" :rules="dropDateRules" suffix="UTC" readonly></v-text-field>
             <v-date-picker v-model="editAirdropForm.drop_date" @input="saveDropDate" :min="today" no-title scrollable></v-date-picker>
           </v-menu>
-          <v-text-field v-else 
-            v-model="editAirdropForm.blacklist" 
-            :label="$t('blacklist_label')" 
-            type="file"
-            prepend-icon="mdi-file-document" 
-            :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})" 
-            :loading="updating.blacklist" 
-            :disabled="updating.blacklist" 
-            :append-icon="updating.blacklist ? 'mdi-loading' : (editAirdropForm.blacklist ? 'mdi-check':'mdi-close')" 
-            :append-icon-cb="() => (onUpdateAirdrop('blacklist'))" 
-            @change="onUpdateAirdrop('blacklist')" 
-            @blur="onUpdateAirdrop('blacklist')"></v-text-field>
         </template>
       </v-list>
       <v-divider></v-divider>
@@ -331,15 +338,15 @@
           gas_price: false,
           drop_date: false,
           give_out: false,
-          blacklist: false,
-          max_submissions: false
+          max_submissions: false,
+          reply_msg: false
         },
         updating: {
           gas_price: false,
           drop_date: false,
           give_out: false,
-          blacklist: false,
-          max_submissions: false
+          max_submissions: false,
+          reply_msg: false
         },
         editAirdropForm: {
           gas_price: 0,
@@ -347,7 +354,7 @@
           give_out: 0,
           status: 0,
           max_submissions: 0,
-          blacklist: null
+          reply_msg: ''
         },
         newPromotionForm: {
           channel_id: 0,
@@ -486,6 +493,7 @@
         this.editAirdropForm.give_out = this.airdrop.give_out
         this.editAirdropForm.status = this.airdrop.status
         this.editAirdropForm.max_submissions = this.airdrop.max_submissions || 0
+        this.editAirdropForm.reply_msg = this.airdrop.reply_msg || ''
       },
       getAirdrop(cb) {
         this.$store.dispatch(types.AIRDROP_GET_REQUEST, { token: this.token, id: this.airdropId }).then(res => {
@@ -561,10 +569,6 @@
           return
         }
 
-        if (field === 'blacklist') {
-          console.log(field)
-        }
-
         const fieldValue = field === 'drop_date' ? moment(this.editAirdropForm[field]).valueOf() : parseInt(this.editAirdropForm[field])
         let airdropValue = this.airdrop[field]
         if (fieldValue === airdropValue) {
@@ -578,6 +582,7 @@
           drop_date: 0,
           give_out: 0,
           max_submissions: this.editAirdropForm.max_submissions,
+          reply_msg: this.editAirdropForm.reply_msg,
           status: parseInt(this.editAirdropForm.status)
         }
         payload[field] = fieldValue
