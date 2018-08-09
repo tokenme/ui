@@ -49,11 +49,17 @@
     <h3 class="text-xs-center" v-else-if="stopped">{{ $t('stopped') }}</h3>
     <h3 class="text-xs-center" v-else-if="notAvailable">{{ $t('not_available') }}</h3>
     <v-stepper vertical non-linear v-model="currentStep" v-else-if="promo && promo.verify_code">
-      <v-stepper-step step="1" :complete="wallet != '' && submitted" editable>
-        {{ $t('input_wallet_title', {symbol: walletName}) }}
+      <v-stepper-step :step="steps.email" :complete="email != ''" editable v-if="promo.airdrop.require_email">
+        {{ $t('input_email_title') }}
+      </v-stepper-step>
+      <v-stepper-content :step="steps.email">
+        <v-text-field prepend-icon="mdi-email" v-model="email" :label="$t('email_label')" :disabled="submitted" required></v-text-field>
+      </v-stepper-content>
+      <v-stepper-step :step="steps.wallet" :complete="wallet != '' && submitted" editable>
+        {{ $t('input_wallet_title', {wallet: walletName}) }}
         <small>{{ $t('input_wallet_subtitle') }}</small>
       </v-stepper-step>
-      <v-stepper-content step="1">
+      <v-stepper-content :step="steps.wallet">
         <template v-if="promo.airdrop.token.client_ios || promo.airdrop.token.client_android">
           <v-alert :value="true" outline color="warning" icon="priority_high">
             {{ $t('download_subtitle', {symbol: promo.airdrop.token.protocol, wallet: walletName}) }}
@@ -83,38 +89,38 @@
           {{ $t('submit') }}
         </v-btn>
       </v-stepper-content>
-      <v-stepper-step step="2" :complete="copyedCode" editable>
+      <v-stepper-step :step="steps.code" :complete="copyedCode" editable>
         {{ $t('copy_code_title') }}
         <small>{{ $t('copy_code_subtitle') }}</small>
       </v-stepper-step>
-      <v-stepper-content step="2">
+      <v-stepper-content :step="steps.code">
         <v-btn depressed block color="success" dark style="text-transform:none"
           v-clipboard:copy="'/'+promo.verify_code+'@'+promo.airdrop.telegram_bot"
           v-clipboard:success="onCopySuccess">
           /{{ promo.verify_code }}@{{ promo.airdrop.telegram_bot }}
         </v-btn>
       </v-stepper-content>
-      <v-stepper-step step="3" editable>
+      <v-stepper-step :step="steps.joinTelegram" editable>
         {{ $t('join_telegram_group_title') }}
         <small>{{ $t('join_telegram_group_subtitle') }}</small>
       </v-stepper-step>
-      <v-stepper-content step="3">
+      <v-stepper-content :step="steps.joinTelegram">
         <v-btn depressed block color="primary" style="text-transform:none" :href="'https://t.me/'+promo.airdrop.telegram_group">
           https://t.me/{{ promo.airdrop.telegram_group }}
         </v-btn>
       </v-stepper-content>
-      <v-stepper-step step="4">
+      <v-stepper-step :step="steps.verifyTelegram">
         {{ $t('verify_in_telegram_group_title') }}
         <small>{{ $t('verify_in_telegram_group_subtitle') }}</small>
       </v-stepper-step>
-      <v-stepper-step step="5">
+      <v-stepper-step :step="steps.waitTransaction">
         {{ $t('wait_for_transaction_title') }}
         <small>{{ promo.airdrop.token.protocol=='ERC20'?$t('wait_for_transaction_subtitle', {wallet: 'ETH'}): $t('wait_for_transaction_subtitle2', {wallet: walletName}) }}</small>
       </v-stepper-step>
-      <v-stepper-step step="6" editable>
+      <v-stepper-step :step="steps.checkMore" editable>
         {{ $t('check_more_title') }}
       </v-stepper-step>
-      <v-stepper-content step="6">
+      <v-stepper-content :step="steps.checkMore">
         <v-btn small href="/">{{ $t('login') }}</v-btn> Tokenmama.io {{ $t('check_more_message') }}
       </v-stepper-content>
     </v-stepper>
@@ -134,6 +140,7 @@
         currentStep: 1,
         key: '',
         promo: null,
+        email: '',
         wallet: '',
         privateKey: '',
         copyedCode: false,
@@ -176,13 +183,34 @@
       },
       notAvailable() {
         return !this.promo || !this.promo.airdrop || !this.promo.verify_code
+      },
+      steps() {
+        if (this.promo && this.promo.airdrop && this.promo.airdrop.require_email) {
+          return {
+            email: 1,
+            wallet: 2,
+            code: 3,
+            joinTelegram: 4,
+            verifyTelegram: 5,
+            waitTransaction: 6,
+            checkMore: 7
+          }
+        }
+        return {
+          wallet: 1,
+          code: 2,
+          joinTelegram: 3,
+          verifyTelegram: 4,
+          waitTransaction: 5,
+          checkMore: 6
+        }
       }
     },
     methods: {
       onCopySuccess(e) {
         this.showSnackbar(this.$i18n.t('copied', { txt: e.text }))
         this.copyedCode = true
-        this.currentStep = 3
+        this.currentStep = this.steps.joinnTelegram
       },
       createNewWallet() {
         this.gettingWallet = true
@@ -218,6 +246,7 @@
         const payload = {
           verify_code: this.promo.verify_code,
           wallet: this.wallet,
+          email: this.email,
           proto: this.key
         }
         this.submitting = true
@@ -227,9 +256,12 @@
             this.showSnackbar(response.message)
             return
           }
+          if (response.verify_code) {
+            this.promo.verify_code = response.verify_code
+          }
           this.promotionLink = response.link
           this.submitted = true
-          this.currentStep = 2
+          this.currentStep = this.steps.code
           this.promotionLinkDialog = true
         })
       },

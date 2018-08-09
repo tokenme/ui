@@ -61,11 +61,13 @@
       <v-card>
         <v-card-title class="headline">{{ $t('withdraw') }}</v-card-title>
         <v-card-text>
-          <v-text-field prepend-icon="mdi-wallet" :label="$t('withdraw_form.wallet_label')"  required></v-text-field>
-          <v-text-field v-model="withdrawForm.token_amount" :label="$t('withdraw_form.token_amount_label')" prepend-icon="mdi-coins" :rules="integerRules" :suffix="airdrop.token.symbol" required></v-text-field>
-          <v-text-field v-model="withdrawForm.eth" :label="$t('withdraw_form.eth_amount_label')" prepend-icon="mdi-currency-eth"></v-text-field>
-          <v-text-field v-model="withdrawForm.gas_price" :label="$t('withdraw_form.gas_price_label')" prepend-icon="mdi-currency-eth" :rules="gasPriceRules" :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})" suffix="Gwei" required></v-text-field>
-          <v-text-field prepend-icon="mdi-key" v-model="withdrawForm.passwd" :label="$t('withdraw_form.password')" :rules="passwordRules" type="password"></v-text-field>
+          <v-form v-model="withdrawForm.valid" ref="withdrawForm" lazy-validation>
+            <v-text-field v-model="withdrawForm.wallet" prepend-icon="mdi-wallet" :label="$t('withdraw_form.wallet_label')"  :rules="walletRules" required></v-text-field>
+            <v-text-field v-model="withdrawForm.token_amount" :label="$t('withdraw_form.token_amount_label')" prepend-icon="mdi-coins" :suffix="airdrop.token.symbol"></v-text-field>
+            <v-text-field v-model="withdrawForm.eth" :label="$t('withdraw_form.eth_amount_label')" prepend-icon="mdi-currency-eth"></v-text-field>
+            <v-text-field v-model="withdrawForm.gas_price" :label="$t('withdraw_form.gas_price_label')" prepend-icon="mdi-currency-eth" :rules="gasPriceRules" :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})" suffix="Gwei" required></v-text-field>
+            <v-text-field prepend-icon="mdi-key" v-model="withdrawForm.passwd" :label="$t('withdraw_form.password')" :rules="passwordRules" type="password"></v-text-field>
+          </v-form>
         </v-card-text>
         <v-card-actions>
           <v-btn color="secondary" @click="newWithdrawDialog=false">{{ $t('close') }}</v-btn>
@@ -116,7 +118,7 @@
               {{ $t('token_symbol') }}: <strong>{{ airdrop.token.symbol }}</strong>
             </v-chip>
             <v-chip small label outline color="primary">
-              {{ $t('token_decimals') }}: <strong>{{ airdrop.token.decimals }}</strong></strong>
+              {{ $t('token_decimals') }}: <strong>{{ airdrop.token.decimals || 0 }}</strong></strong>
             </v-chip>
           </div>
         </template>
@@ -159,6 +161,15 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar 
+          v-if="(isAdmin || isOwner) && airdrop.require_email && airdrop.token.protocol == 'ERC20'">
+          <v-list-tile-avatar>
+            <v-icon>mdi-email</v-icon>
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ $t('require_email_label') }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile avatar 
           v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'"
           v-clipboard:copy="airdrop.wallet"
           v-clipboard:success="onCopySuccess">
@@ -188,10 +199,29 @@
             <v-icon>mdi-coins</v-icon>
           </v-list-tile-avatar>
           <v-list-tile-content>
-            <v-list-tile-title>{{ airdrop.token_balance / Math.pow(10, airdrop.token.decimals) }}</v-list-tile-title>
+            <v-list-tile-title>{{ airdrop.token.decimals ? (airdrop.token_balance / Math.pow(10, airdrop.token.decimals)) : airdrop.token_balance }}</v-list-tile-title>
             <v-list-tile-sub-title>{{ $t('token_balance') }}</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile avatar v-if="!editing.max_submissions && (isAdmin || isOwner)" @click="editing.max_submissions = !editing.max_submissions ">
+            <v-list-tile-avatar>
+              <v-icon>mdi-account-group</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ airdrop.max_submissions || 0 }}</v-list-tile-title>
+              <v-list-tile-sub-title>{{ $t('max_submissions_label') }}</v-list-tile-sub-title>
+            </v-list-tile-content>
+          </v-list-tile>
+          <v-text-field v-else 
+            v-model="editAirdropForm.max_submissions" 
+            :label="$t('max_submissions_label')" 
+            prepend-icon="mdi-account-group" 
+            :loading="updating.max_submissions" 
+            :disabled="updating.max_submissions" 
+            :append-icon="updating.max_submissions ? 'mdi-loading' : (parseInt(editAirdropForm.max_submissions) != (airdrop.max_submissions || 0) ? 'mdi-check':'mdi-close')" 
+            :append-icon-cb="() => (onUpdateAirdrop('max_submissions'))" 
+            @change="onUpdateAirdrop('max_submissions')" 
+            @blur="onUpdateAirdrop('max_submissions')"></v-text-field>
         <v-list-tile v-if="(isAdmin || isOwner) && airdrop.token.protocol == 'ERC20'">
           <v-list-tile-content>
             <v-list-tile-title style="height:40px">
@@ -226,25 +256,42 @@
             :append-icon-cb="() => (onUpdateAirdrop('gas_price'))" 
             @change="onUpdateAirdrop('gas_price')" 
             @blur="onUpdateAirdrop('gas_price')"></v-text-field>
-          <v-list-tile avatar v-if="!editing.gas_limit" @click="editing.gas_limit = !editing.gas_limit">
+          <v-list-tile avatar v-if="!editing.drop_date" @click="editing.drop_date = !editing.drop_date">
             <v-list-tile-avatar>
-              <v-icon>mdi-arrow-collapse-up</v-icon>
+              <v-icon>mdi-calendar-today</v-icon>
             </v-list-tile-avatar>
             <v-list-tile-content>
-              <v-list-tile-title>{{ airdrop.gas_limit }}</v-list-tile-title>
-              <v-list-tile-sub-title>{{ $t('gas_limit') }}</v-list-tile-sub-title>
+              <v-list-tile-title>{{ dateFormat(airdrop.drop_date) }}</v-list-tile-title>
+              <v-list-tile-sub-title>{{ $t('drop_date_sub_label') }}</v-list-tile-sub-title>
             </v-list-tile-content>
           </v-list-tile>
+          <v-menu v-else
+            ref="drop_date_menu"
+            :close-on-content-click="false"
+            v-model="drop_date_menu"
+            lazy
+            transition="scale-transition"
+            offset-y
+            full-width
+            :nudge-right="40"
+            min-width="290px"
+            :return-value.sync="editAirdropForm.drop_date"
+          >
+            <v-text-field slot="activator" v-model="dropDateFormatted" :label="$t('drop_date_label')" prepend-icon="mdi-calendar-today" :rules="dropDateRules" suffix="UTC" readonly></v-text-field>
+            <v-date-picker v-model="editAirdropForm.drop_date" @input="saveDropDate" :min="today" no-title scrollable></v-date-picker>
+          </v-menu>
           <v-text-field v-else 
-            v-model="editAirdropForm.gas_limit" 
-            :label="$t('gas_limit_label')"
-            prepend-icon="mdi-arrow-collapse-up"
-            :loading="updating.gas_limit" 
-            :disabled="updating.gas_limit" 
-            :append-icon="updating.gas_limit ? 'mdi-loading' : (parseInt(editAirdropForm.gas_limit) != airdrop.gas_limit ? 'mdi-check':'mdi-close')" 
-            :append-icon-cb="() => (onUpdateAirdrop('gas_limit'))" 
-            @change="onUpdateAirdrop('gas_limit')" 
-            @blur="onUpdateAirdrop('gas_limit')"></v-text-field>
+            v-model="editAirdropForm.blacklist" 
+            :label="$t('blacklist_label')" 
+            type="file"
+            prepend-icon="mdi-file-document" 
+            :hint="$t('suggest_gas_price_hint', {price: suggest_gas_price})" 
+            :loading="updating.blacklist" 
+            :disabled="updating.blacklist" 
+            :append-icon="updating.blacklist ? 'mdi-loading' : (editAirdropForm.blacklist ? 'mdi-check':'mdi-close')" 
+            :append-icon-cb="() => (onUpdateAirdrop('blacklist'))" 
+            @change="onUpdateAirdrop('blacklist')" 
+            @blur="onUpdateAirdrop('blacklist')"></v-text-field>
         </template>
       </v-list>
       <v-divider></v-divider>
@@ -278,22 +325,29 @@
         newPromotionDialog: false,
         promotionResponseDialog: false,
         newWithdrawDialog: false,
+        drop_date_menu: false,
         promotionResponse: null,
         editing: {
           gas_price: false,
-          gas_limit: false,
-          give_out: false
+          drop_date: false,
+          give_out: false,
+          blacklist: false,
+          max_submissions: false
         },
         updating: {
           gas_price: false,
-          gas_limit: false,
-          give_out: false
+          drop_date: false,
+          give_out: false,
+          blacklist: false,
+          max_submissions: false
         },
         editAirdropForm: {
           gas_price: 0,
-          gas_limit: 0,
+          drop_date: '',
           give_out: 0,
-          status: 0
+          status: 0,
+          max_submissions: 0,
+          blacklist: null
         },
         newPromotionForm: {
           channel_id: 0,
@@ -304,7 +358,8 @@
           token_amount: 0,
           eth: 0,
           gas_price: 0,
-          passwd: ''
+          passwd: '',
+          valid: true
         },
         suggest_gas_price: 50,
         editingAdzone: false,
@@ -343,16 +398,28 @@
           v => !!v || this.$i18n.t('error.password_required')
         ]
       },
-      integerRules() {
-        return [
-          v => parseInt(v) > 0 || this.$i18n.t('error.number_required')
-        ]
-      },
       gasPriceRules() {
         return [
-          v => parseInt(v) > 3 || this.$i18n.t('error.min_gas_price'),
+          v => parseInt(v) >= 1 || this.$i18n.t('error.min_gas_price'),
           v => parseInt(v) <= 500 || this.$i18n.t('error.max_gas_price')
         ]
+      },
+      walletRules() {
+        return [
+          v => !!v || this.$i18n.t('error.wallet_required'),
+          v => /^0x[a-fA-F0-9]{40}$/.test(v) || this.$i18n.t('error.wallet_invalid')
+        ]
+      },
+      dropDateRules() {
+        return [
+          v => !!v || this.$i18n.t('error.drop_date_required')
+        ]
+      },
+      dropDateFormatted () {
+        return this.dateFormat(this.editAirdropForm.drop_date)
+      },
+      today() {
+        return moment().format('YYYY-MM-DD')
       }
     },
     methods: {
@@ -415,9 +482,10 @@
       },
       syncEditingAirdropData() {
         this.editAirdropForm.gas_price = this.airdrop.gas_price
-        this.editAirdropForm.gas_limit = this.airdrop.gas_limit
+        this.editAirdropForm.drop_date = this.airdrop.drop_date
         this.editAirdropForm.give_out = this.airdrop.give_out
         this.editAirdropForm.status = this.airdrop.status
+        this.editAirdropForm.max_submissions = this.airdrop.max_submissions || 0
       },
       getAirdrop(cb) {
         this.$store.dispatch(types.AIRDROP_GET_REQUEST, { token: this.token, id: this.airdropId }).then(res => {
@@ -481,12 +549,23 @@
         }
         this.editing.give_out = !this.editing.give_out
       },
+      saveDropDate (date) {
+        this.$refs.drop_date_menu.save(date)
+        if (!this.isAdmin && !this.isOwner) {
+          return
+        }
+        this.onUpdateAirdrop('drop_date')
+      },
       onUpdateAirdrop(field) {
         if (this.updating[field]) {
           return
         }
 
-        const fieldValue = parseInt(this.editAirdropForm[field])
+        if (field === 'blacklist') {
+          console.log(field)
+        }
+
+        const fieldValue = field === 'drop_date' ? moment(this.editAirdropForm[field]).valueOf() : parseInt(this.editAirdropForm[field])
         let airdropValue = this.airdrop[field]
         if (fieldValue === airdropValue) {
           this.updating[field] = false
@@ -496,8 +575,9 @@
         let payload = {
           id: this.airdrop.id,
           gas_price: 0,
-          gas_limit: 0,
+          drop_date: 0,
           give_out: 0,
+          max_submissions: this.editAirdropForm.max_submissions,
           status: parseInt(this.editAirdropForm.status)
         }
         payload[field] = fieldValue
@@ -510,9 +590,6 @@
             this.showErrorDialog({ title: this.$i18n.t('error.update_airdrop_failed'), message: this.$i18n.t('error.max_gas_price') })
             return
           }
-        } else if (field === 'gas_limit' && payload.gas_limit < 150000) {
-          this.showErrorDialog({ title: this.$i18n.t('error.update_airdrop_failed'), message: this.$i18n.t('error.min_gas_limit') })
-          return
         } else if (field === 'give_out' && payload.give_out <= 0) {
           this.showErrorDialog({ title: this.$i18n.t('error.update_airdrop_failed'), message: this.$i18n.t('error.number_required') })
           return
@@ -531,14 +608,17 @@
       },
       showWithdrawDialog() {
         this.withdrawForm = {
-          wallet: this.airdrop.wallet,
-          token_amount: this.airdrop.token_balance / Math.pow(10, this.airdrop.token.decimals),
+          wallet: '',
+          token_amount: this.airdrop.token.decimals ? this.airdrop.token_balance / Math.pow(10, this.airdrop.token.decimals) : this.airdrop.token_balance,
           eth: (this.airdrop.gas_balance_gwei / Math.pow(10, 9)).toFixed(2),
           gas_price: this.suggest_gas_price || 0
         }
         this.newWithdrawDialog = true
       },
       onWithdraw() {
+        if (!this.$refs.withdrawForm.validate()) {
+          return false
+        }
         this.withdrawing = true
         const payload = {
           airdrop_id: this.airdrop.id,
@@ -547,6 +627,10 @@
           eth: parseFloat(this.withdrawForm.eth),
           gas_price: parseInt(this.withdrawForm.gas_price),
           passwd: this.withdrawForm.passwd
+        }
+        if (payload.token_amount > 0 && payload.eth > 0) {
+          this.showErrorDialog({ title: this.$i18n.t('error.withdraw_failed'), message: this.$i18n.t('error.withdraw_seperatly') })
+          return
         }
         airdropAPI.withdraw(this.token, payload).then((response) => {
           this.withdrawing = false
@@ -561,7 +645,6 @@
       },
       onCreatePromotion() {
         const channelId = this.newPromotionForm.channel_id
-        console.log(this.newPromotionForm, channelId)
         if (!channelId) {
           this.showSnackbar(this.$i18n.t('error.need_channel'))
           return

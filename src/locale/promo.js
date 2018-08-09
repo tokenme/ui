@@ -1,6 +1,8 @@
 export default {
   messages: {
     en: {
+      input_email_title: 'Input your email Address',
+      email_label: 'Email Address',
       input_wallet_title: 'Input your {symbol} wallet Address',
       input_wallet_subtitle: 'please double check, make sure your wallet address is correct. If any error results in failure, please bear the responsibility!',
       download_subtitle: '{symbol} is Ethereum compitable TOKEN, Download {wallet} client and register a new wallet address.',
@@ -32,6 +34,8 @@ export default {
       }
     },
     zh_TW: {
+      input_email_title: '輸入您的電子郵箱地址',
+      email_label: '電子郵箱地址',
       input_wallet_title: '輸入您的 {wallet} 錢包地址',
       input_wallet_subtitle: '請仔細檢查您的錢包地址並確認是正確的，若有錯誤導致發放失敗，請自行承擔責任！',
       download_subtitle: '{symbol} 擁有自己可拓展性開源獨立公鏈技術，需單獨 {wallet} 钱包客户端后生成钱包地址。',
@@ -63,6 +67,8 @@ export default {
       }
     },
     zh_CN: {
+      input_email_title: '输入您的电子邮箱地址',
+      email_label: '电子邮箱地址',
       input_wallet_title: '输入您的 {wallet} 钱包地址',
       input_wallet_subtitle: '请仔细检查您的钱包地址并确认是正确的，若有错误导致发放失败，请自行承担责任！',
       download_subtitle: '{symbol} 拥有自己可拓展性开源独立公链技术，需单独下载 {wallet} 钱包客户端后生成钱包地址。',
