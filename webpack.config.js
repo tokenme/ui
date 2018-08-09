@@ -37,7 +37,7 @@ module.exports = (options = {}) => ({
     'vue-chartjs': 'VueChartJs',
     'moment': 'moment',
     'v-qrcode': 'VQrcode',
-    'jWeixin': 'weixin-js-sdk'
+    'jWeixin': 'jWeixin'
   },
   output: {
     path: resolve(__dirname, OUTPUT_DIR),
