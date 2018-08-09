@@ -14,6 +14,7 @@
 <script>
   import * as types from '../store/mutation-types'
   import { bus } from '../bus'
+  import * as util from '../util'  
 
   export default {
     computed: {
@@ -30,6 +31,11 @@
           this.toggleLoading(false)
         }, err => {
           this.toggleLoading(false)
+          if ((err.code === 401 || err.code === 403) && util.isWeixinBrowser()) {
+            localStorage.clear()
+            this.$router.replace('/guide?relogin=1')
+            return
+          }          
           if (err.code === 401) {
             this.$router.push({
               name: 'login'

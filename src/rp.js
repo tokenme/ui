@@ -8,6 +8,7 @@ import MetaInfo from 'vue-meta-info'
 import gtagjs from 'vue-gtagjs'
 
 import App from './RedPacketApp.vue'
+import Guide from './components/Guide.vue'
 import Login from './components/Login.vue'
 import Register from './components/Register.vue'
 import ResetPassword from './components/ResetPassword.vue'
@@ -22,6 +23,8 @@ import Token from './components/Token.vue'
 import store from './store'
 import i18nCommon from './locale/common'
 import * as types from './store/mutation-types'
+import * as util from './util'
+import wx from 'weixin-js-sdk'
 
 Vue.use(VueI18n)
 Vue.use(VueRouter)
@@ -43,6 +46,14 @@ store.dispatch(types.GET_COUNTRY_CODE_REQUEST)
 
 const router = new VueRouter({
   routes: [{
+    name: 'guide',
+    path: '/guide',
+    component: Guide,
+    meta: {
+      title: 'guide',
+      showToolBar: false
+    }
+  }, {
     name: 'login',
     path: '/login',
     component: Login,
@@ -200,6 +211,38 @@ if (window.performance && window.gtag) {
 if (window.Raven) {
   window.Raven.config('https://8e1767d8d7b94183805e4d1515665468@sentry.io/994578').install()
 }
+if (util.isWeixinBrowser()) {
+  document.title = '糖果航母'
+  util.getWeixinJs(location.href.split('#')[0]).then((jsConfig) => {
+    if (jsConfig && jsConfig.app_id) {
+      let wxConfig = {
+        debug: false,
+        appId: jsConfig.app_id,
+        timestamp: parseInt(jsConfig.timestamp),
+        nonceStr: jsConfig.nonce_str,
+        signature: jsConfig.signature,
+        jsApiList: [
+          'onMenuShareAppMessage'
+        ]
+      }
+      console.log(wxConfig)
+      wx.config(wxConfig)
+      wx.ready(function(){
+        wx.onMenuShareAppMessage({
+          title: document.title,
+          desc: '您专属的区块链红包',
+          link: location.href.split('#')[0],
+          imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
+          type: '',
+          dataUrl: '',
+          success: function () {
+            console.log('shared')
+          }
+        });
+      })
+    }
+  })
+}
 
 router.beforeEach((to, from, next) => {
   const runner = async() => {
@@ -216,12 +259,21 @@ router.beforeEach((to, from, next) => {
         }
         next()
       } catch (e) {
-        next({
-          path: '/login',
-          query: {
-            redirect: to.fullPath
-          }
-        })
+        if (util.isWeixinBrowser()) {
+          next({
+            path: '/guide',
+            query: {
+              redirect: to.fullPath
+            }
+          })
+        } else {
+          next({
+            path: '/login',
+            query: {
+              redirect: to.fullPath
+            }
+          })
+        }
       }
     } else if (to.matched.some(record => record.meta.checkAuth)){
       try {
