@@ -513,13 +513,7 @@
         })
       },
       checkHongbao() {
-        if (util.isWeixinBrowser()) {
-          if (this.key) {
-            localStorage.setItem('share_key', this.key)
-          }
-          this.$router.replace('/guide?relogin=1')
-          return
-        } else if (this.logined) {
+        if (this.logined) {
           this.logining = true
           this.submitRedPacket().then(res => {
             if (res.message === 'unlucky') {
@@ -539,7 +533,13 @@
             this.showErrorDialog({ title: this.$i18n.t('error.submit_failed'), message: err.message })
           })
           return
-        } 
+        } else if (util.isWeixinBrowser()) {
+          if (this.key) {
+            localStorage.setItem('share_key', this.key)
+          }
+          this.$router.replace('/guide?relogin=1')
+          return
+        }
         this.loginDialog = true
       },
       submitRedPacket() {
