@@ -316,6 +316,19 @@
           if (cb) {
             cb()
           }
+          if (this.isWeixinBrowser) {
+            let shareConfig = {
+              title: this.share.title,
+              desc: this.share.description,
+              link: res.link,
+              imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
+              type: '',
+              dataUrl: '',
+              success: function () {
+              }
+            }
+            wx.onMenuShareAppMessage(shareConfig)
+          }
         }, err => {
           this.toggleLoading(false)
           if ((err.code === 401 || err.code === 403) && util.isWeixinBrowser()) {
@@ -355,20 +368,6 @@
     created() {
       this.isWeixinBrowser = util.isWeixinBrowser()
       this.redPacketId = parseInt(this.$route.params.id)
-      if (this.isWeixinBrowser) {
-        let shareConfig = {
-          title: this.share.title,
-          desc: this.share.description,
-          link: this.share.link,
-          imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
-          type: '',
-          dataUrl: '',
-          success: function () {
-            console.log('shared')
-          }
-        }
-        wx.onMenuShareAppMessage(shareConfig)
-      }
     },
     mounted() {
       if (!this.redPacketId || this.redPacketId.id !== this.redPacketId) {
