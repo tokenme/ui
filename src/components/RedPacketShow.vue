@@ -321,6 +321,7 @@
   import smsAPI from '../api/sms'
   import i18n from '../locale/rp'
   import * as util from '../util'
+  import wx from 'jWeixin'
 
   export default {
     i18n: i18n,
@@ -723,14 +724,34 @@
     },
     mounted() {
       this.toggleLoading(true)
-      this.getRedPacket().then(res => {
-        if (util.isWeixinBrowser() && res && res.link && res.link.indexOf('tokenmama.io') > -1) {
-          location.href = res.link.replace('tokenmama.io', 'tmm.tianxi100.com')
-        }
+      this.getRedPacket().then(res => { 
         this.toggleLoading(false)
         this.redPacket = res
         if (this.showAllTaken || this.expired) {
           this.showErrorDialog({title: this.$i18n.t('error.unlucky_title'), message: this.$i18n.t('error.unlucky_message')})
+        }
+        if (util.isWeixinBrowser()) {
+          if (res.link && res.link.indexOf('tokenmama.io') > -1) {
+            location.href = res.link.replace('tokenmama.io', 'tmm.tianxi100.com')
+          }
+          let title = this.$i18n.t('rp_share.default')
+          if (res.user) {
+            title = this.$i18n.t('rp_share.title', {user: res.user.showname, num: res.recipients, token: res.token.name}) 
+          }
+          let shareConfig = {
+            title: title,
+            desc: this.$i18n.t('rp_share.desc'),
+            link: res.link.replace('tokenmama.io', 'tmm.tianxi100.com'),
+            imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
+            type: 'link',
+            dataUrl: '',
+            success: function () {
+            }
+          }
+          wx.ready(function(){
+            wx.onMenuShareAppMessage(shareConfig)
+            wx.onMenuShareTimeline(shareConfig)
+          })
         }
       }, err => {
         console.log(err)

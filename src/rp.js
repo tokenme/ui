@@ -222,21 +222,27 @@ if (util.isWeixinBrowser()) {
         nonceStr: jsConfig.nonce_str,
         signature: jsConfig.signature,
         jsApiList: [
-          'onMenuShareAppMessage'
+          'onMenuShareAppMessage',
+          'onMenuShareTimeline',
+          'hideMenuItems'
         ]
       }
       wx.config(wxConfig)
+      let shareConfig = {
+        title: '糖果航母',
+        desc: '您专属的区块链红包',
+        link: location.href.split('#')[0],
+        imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
+        type: '',
+        dataUrl: '',
+        success: function () {
+        }
+      }
       wx.ready(function(){
-        wx.onMenuShareAppMessage({
-          title: document.title,
-          desc: '您专属的区块链红包',
-          link: location.href.split('#')[0],
-          imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
-          type: '',
-          dataUrl: '',
-          success: function () {
-            console.log('shared')
-          }
+        wx.onMenuShareAppMessage(shareConfig)
+        wx.onMenuShareTimeline(shareConfig)
+        wx.hideMenuItems({
+          menuList: ['menuItem:share:qq', 'menuItem:share:weiboApp', 'menuItem:share:facebook', 'menuItem:share:QZone', 'menuItem:openWithQQBrowser', 'menuItem:openWithSafari', 'menuItem:share:brand']
         });
       })
     }
