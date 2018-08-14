@@ -72,7 +72,7 @@
       menus() {
         return [
           { title: this.$i18n.t('airdrop'), icon: 'mdi-airballoon', router: 'airdrops' },
-          { title: this.$i18n.t('promotion'), icon: 'mdi-share-variant', router: 'promotions' },
+          //{ title: this.$i18n.t('promotion'), icon: 'mdi-share-variant', router: 'promotions' },
           { title: this.$i18n.t('red-packets'), icon: 'mdi-wallet-giftcard', href: 'https://tokenmama.io/rp.html' },
           { title: this.$i18n.t('channel'), icon: 'mdi-format-list-bulleted', router: 'channels' },
           { title: this.$i18n.t('fund'), icon: 'mdi-wallet', router: 'fund' },
