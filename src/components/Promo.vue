@@ -106,7 +106,10 @@
       </v-stepper-step>
       <v-stepper-content :step="steps.joinTelegram">
         <v-btn depressed block color="primary" style="text-transform:none" :href="'https://t.me/'+promo.airdrop.telegram_group">
-          https://t.me/{{ promo.airdrop.telegram_group }}
+          {{ $t('telegram') }}: https://t.me/{{ promo.airdrop.telegram_group }}
+        </v-btn>
+        <v-btn depressed block color="primary" style="text-transform:none" :href="'https://0.plus/'+promo.airdrop.telegram_group">
+          {{ $t('biyong') }}: https://0.plus/{{ promo.airdrop.telegram_group }}
         </v-btn>
       </v-stepper-content>
       <v-stepper-step :step="steps.verifyTelegram">

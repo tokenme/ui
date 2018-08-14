@@ -110,13 +110,13 @@
       },
       headers() {
         return [
-          { text: this.$i18n.t('stats.header.record_on'), value: 'record_on' },
-          { text: this.$i18n.t('stats.header.pv'), value: 'pv' },
-          { text: this.$i18n.t('stats.header.submissions'), value: 'submissions' },
-          { text: this.$i18n.t('stats.header.transactions'), value: 'transactions' },
-          { text: this.$i18n.t('stats.header.give_out'), value: 'give_out' },
-          { text: this.$i18n.t('stats.header.bonus'), value: 'bonus' },
-          { text: this.$i18n.t('stats.header.commission_fee'), value: 'commission_fee' }
+          { text: this.$i18n.t('stats.header.record_on'), value: 'record_on', align: 'left' },
+          { text: this.$i18n.t('stats.header.pv'), value: 'pv', align: 'right' },
+          { text: this.$i18n.t('stats.header.submissions'), value: 'submissions', align: 'right' },
+          { text: this.$i18n.t('stats.header.transactions'), value: 'transactions', align: 'right' },
+          { text: this.$i18n.t('stats.header.give_out'), value: 'give_out', align: 'right' },
+          { text: this.$i18n.t('stats.header.bonus'), value: 'bonus', align: 'right' },
+          { text: this.$i18n.t('stats.header.commission_fee'), value: 'commission_fee', align: 'right' }
         ]
       },
       chartSeriesSelections() {
