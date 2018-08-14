@@ -18,7 +18,8 @@ export default {
         weibo: 'Weibo',
         line: 'Line',
         whatsapp: 'Whatsapp',
-        wechat: 'Wechat'
+        wechat: 'Wechat',
+        wechat_mp: 'Click ••• To Send Red Packet'
       },
       tabs: {
         wallet: 'Wallet',
@@ -82,7 +83,8 @@ export default {
         weibo: '微博',
         line: 'Line',
         whatsapp: 'Whatsapp',
-        wechat: '微信'
+        wechat: '微信',
+        wechat_mp: '點擊右上角 ••• 給微信好友發紅包'
       },
       toolbarTitle: {
         userinfo: '用戶中心',
@@ -146,7 +148,8 @@ export default {
         weibo: '微博',
         line: 'Line',
         whatsapp: 'Whatsapp',
-        wechat: '微信'
+        wechat: '微信',
+        wechat_mp: '点击右上角 ••• 给微信好友发红包'
       },
       toolbarTitle: {
         userinfo: '用户中心',

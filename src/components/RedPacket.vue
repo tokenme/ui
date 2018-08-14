@@ -21,6 +21,14 @@
     <v-bottom-sheet v-if="isWeixinBrowser" v-model="shareSheet">
       <v-list>
         <v-subheader>{{ $t('share.title') }}</v-subheader>
+        <v-list-tile>
+          <v-list-tile-avatar>
+            <v-avatar tile>
+              <v-icon>mdi-wechat</v-icon>
+            </v-avatar>
+          </v-list-tile-avatar>
+          <v-list-tile-title>{{ $t('share.wechat_mp') }}</v-list-tile-title>
+        </v-list-tile>
         <v-list-tile @click="copyLink">
           <v-list-tile-avatar>
             <v-avatar tile>
@@ -28,14 +36,6 @@
             </v-avatar>
           </v-list-tile-avatar>
           <v-list-tile-title>{{ $t('share.copy') }}</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="shareWechat">
-          <v-list-tile-avatar>
-            <v-avatar tile>
-              <v-icon>mdi-wechat</v-icon>
-            </v-avatar>
-          </v-list-tile-avatar>
-          <v-list-tile-title>{{ $t('share.wechat') }}</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-bottom-sheet>
@@ -320,14 +320,17 @@
             let shareConfig = {
               title: this.share.title,
               desc: this.share.description,
-              link: res.link,
+              link: res.link.replace('tokenmama.io', 'tmm.tianxi100.com'),
               imgUrl: 'http://wx.qlogo.cn/mmopen/QHhxWge7cNNbpLh0vE4cicINXb2SUxV5mjAXouSejicPckZBpdIWMkiaORmF8O306Iaf0CSMAxVw7LVsblnkibPg6QehjbN28jbE/64',
-              type: '',
+              type: 'link',
               dataUrl: '',
               success: function () {
               }
             }
-            wx.onMenuShareAppMessage(shareConfig)
+            wx.ready(function(){
+              wx.onMenuShareAppMessage(shareConfig)
+              wx.onMenuShareTimeline(shareConfig)
+            })
           }
         }, err => {
           this.toggleLoading(false)
