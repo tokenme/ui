@@ -134,7 +134,7 @@
   import * as types from '../store/mutation-types'
   import promotionAPI from '../api/promotion'
   import i18n from '../locale/promo'
-  const PROMO_PAGE_STATIC = 'https://static.tianxi100.com/tmm/promotions/'
+  const PROMO_PAGE_STATIC = 'https://tokenmama.io/promotion-pages/'
 
   export default {
     i18n: i18n,
@@ -290,7 +290,7 @@
         this.toggleLoading(false)
         this.promo = res
         if (res.airdrop && res.airdrop.promotion_page) {
-          location.href = PROMO_PAGE_STATIC + res.airdrop.promotion_page;
+          location.href = PROMO_PAGE_STATIC + res.airdrop.promotion_page + '/index.html#/' + this.key;
         } else {
           this.isShowPage = true
         }
