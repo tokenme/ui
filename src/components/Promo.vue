@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid grid-list-lg>
+  <v-container v-if="isShowPage" fluid grid-list-lg>
     <v-dialog v-model="promotionLinkDialog">
       <v-card v-if="promotionLink">
         <v-card-title class="headline" v-if="promotionLink">{{ $t('promote_btn') }}</v-card-title>
@@ -134,11 +134,13 @@
   import * as types from '../store/mutation-types'
   import promotionAPI from '../api/promotion'
   import i18n from '../locale/promo'
+  const PROMO_PAGE_STATIC = 'https://static.tianxi100.com/tmm/promotions/'
 
   export default {
     i18n: i18n,
     data() {
       return {
+        isShowPage: false,
         loading: false,
         currentStep: 1,
         key: '',
@@ -287,6 +289,11 @@
       this.getPromo().then(res => {
         this.toggleLoading(false)
         this.promo = res
+        if (res.airdrop && res.airdrop.promotion_page) {
+          location.href = PROMO_PAGE_STATIC + res.airdrop.promotion_page;
+        } else {
+          this.isShowPage = true
+        }
       }, err => {
         console.log(err)
         this.toggleLoading(false)
