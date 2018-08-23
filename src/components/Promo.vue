@@ -42,7 +42,9 @@
         <p v-html="airdropDescription" style="line-height:1.8em"></p>
       </v-container>
     </v-card>
-    <v-btn block color="success" @click.native="promotionLinkDialog=true" v-if="promo && promo.airdrop">{{ promo.airdrop.token.protocol==='ERC20' ? $t('promote_btn_with_amount', {amount: promo.airdrop.bonus + '%'}) : $t('promote_btn') }}</v-btn>
+    <v-btn block color="success" @click.native="promotionLinkDialog=true" v-if="promo && promo.airdrop">
+      {{ promo.airdrop.token.protocol==='ERC20' ? $t('promote_btn_with_amount', {amount: promo.airdrop.bonus + '%', name: promo.airdrop.token.name}) : $t('promote_btn') }}
+    </v-btn>
     <v-divide></v-divide>
     <h3 class="text-xs-center" v-if="finished">{{ $t('finished') }}</h3>
     <h3 class="text-xs-center" v-else-if="notStart">{{ $t('not_start') }}</h3>
