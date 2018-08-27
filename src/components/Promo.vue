@@ -120,7 +120,9 @@
       </v-stepper-step>
       <v-stepper-step :step="steps.waitTransaction">
         {{ $t('wait_for_transaction_title') }}
-        <small>{{ promo.airdrop.token.protocol=='ERC20'?$t('wait_for_transaction_subtitle', {wallet: 'ETH'}): $t('wait_for_transaction_subtitle2', {wallet: walletName}) }}</small>
+        <small>
+          {{ promo.airdrop.token.protocol=='ERC20'? $t('wait_for_transaction_subtitle', {wallet: 'ETH', project_name: promo.airdrop.token.name}): $t('wait_for_transaction_subtitle2', {wallet: walletName, project_name: promo.airdrop.token.name}) }}
+        </small>
       </v-stepper-step>
       <v-stepper-step :step="steps.checkMore" editable>
         {{ $t('check_more_title') }}
