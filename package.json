@@ -74,6 +74,6 @@
     "webpack-dev-server": "^3.11.2",
     "sw-precache": "^5.2.1",
     "sw-toolbox": "^3.6.0",
-    "node-sass": "^4.5.3"
+    "node-sass": "^7.0.0"
   }
 }
