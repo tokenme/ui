@@ -61,7 +61,7 @@
     "vue-i18n": "^7.4.2",
     "vuex": "^2.3.0",
     "v-qrcode": "^1.0.3",
-    "axios": "^0.21.1",
+    "axios": "^0.30.2",
     "vue-clipboard2": "^v0.0.8",
     "chart.js": "^2.7.1",
     "vue-chartjs": "^3.2.1",
