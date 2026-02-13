@@ -68,7 +68,7 @@
     "vue-gtagjs": "^1.0.7",
     "vue-gtagjs-directive": "^1.0.3",
     "moment": "^2.20.1",
-    "webpack": "^3.4.1",
+    "webpack": "^5.105.2",
     "preload-webpack-plugin": "^2.3.0",
     "script-ext-html-webpack-plugin": "^1.8.8",
     "webpack-dev-server": "^5.2.3",
