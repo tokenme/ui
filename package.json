@@ -63,7 +63,7 @@
     "v-qrcode": "^1.0.3",
     "axios": "^0.30.2",
     "vue-clipboard2": "^v0.0.8",
-    "chart.js": "^2.7.1",
+    "chart.js": "^2.9.4",
     "vue-chartjs": "^3.2.1",
     "vue-gtagjs": "^1.0.7",
     "vue-gtagjs-directive": "^1.0.3",
